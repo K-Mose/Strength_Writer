@@ -10,14 +10,16 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.example.strengthwriter.navigation.Navigation
 import com.example.strengthwriter.ui.theme.Strength_writerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-            }
+            val navController = rememberNavController()
+            Navigation(navController = navController)
         }
     }
 }
