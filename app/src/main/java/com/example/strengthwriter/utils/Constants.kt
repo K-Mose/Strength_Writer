@@ -1,6 +1,10 @@
 package com.example.strengthwriter.utils
 
 object Constants {
-    val LIST_SCREEN = "list/{action}"
-    val DETAIL_SCREEN = "detail/{id}"
+    const val MISSION_TABLE = "mission_table"
+    const val WORKOUT_TABLE = "workout_table"
+    const val SETS_TABLE = "sets_table"
+
+    const val LIST_SCREEN = "list/{action}"
+    const val DETAIL_SCREEN = "detail/{id}"
 }
