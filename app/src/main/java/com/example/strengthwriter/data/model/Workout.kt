@@ -14,5 +14,7 @@ data class Workout(
     val name: Exercise,
     val date: String? = null,
     @Ignore
-    val sets: List<Sets>,
-)
+    val sets: List<Sets>?
+) {
+    constructor(id: Int, missionId: Int?, name: Exercise, date: String?): this(id, missionId, name, date, null)
+}

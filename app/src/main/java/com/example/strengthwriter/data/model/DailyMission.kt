@@ -12,5 +12,7 @@ data class DailyMission(
     val title: String,
     val date: String,
     @Ignore
-    val workouts: List<Workout>
-)
+    val workout: List<Workout>?
+) {
+    constructor(id: Int, title: String, date: String) : this(id, title, date, null)
+}
