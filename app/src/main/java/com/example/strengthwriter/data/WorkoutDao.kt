@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WorkoutDao {
 
-    @Query("SELECT * FROM $WORKOUT_TABLE FROM missionId = :missionId ORDER BY id")
+    @Query("SELECT * FROM $WORKOUT_TABLE WHERE missionId = :missionId ORDER BY id")
     fun getAllWorkout(missionId: Int): Flow<List<Workout>>
 
-    @Query("SELECT * FROM $WORKOUT_TABLE FROM id = :id")
+    @Query("SELECT * FROM $WORKOUT_TABLE WHERE id = :id")
     fun getWorkout(id: Int): Flow<Workout>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

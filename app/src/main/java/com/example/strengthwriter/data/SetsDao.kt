@@ -11,7 +11,7 @@ interface SetsDao {
     fun getAllSets(workoutId: Int): Flow<List<Sets>>
 
     @Query("SELECT * FROM $SETS_TABLE WHERE id = :id")
-    fun getSets(Id: Int): Flow<Sets>
+    fun getSets(id: Int): Flow<Sets>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertNewSets(sets: Sets)
@@ -20,5 +20,5 @@ interface SetsDao {
     suspend fun updateSets(sets: Sets)
 
     @Delete
-    suspend fun deleteSets(id: Int)
+    suspend fun deleteSets(sets: Sets)
 }

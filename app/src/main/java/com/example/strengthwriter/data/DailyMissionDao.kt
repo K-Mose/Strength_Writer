@@ -20,5 +20,5 @@ interface DailyMissionDao {
     suspend fun updateDailyMission(mission: DailyMission)
 
     @Delete
-    suspend fun deleteDailyMission(id: Int)
+    suspend fun deleteDailyMission(mission: DailyMission)
 }
