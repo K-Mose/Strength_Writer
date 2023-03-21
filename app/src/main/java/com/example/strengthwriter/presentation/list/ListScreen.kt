@@ -7,20 +7,24 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import com.example.strengthwriter.R
+import com.example.strengthwriter.data.local.TestData
 import com.example.strengthwriter.ui.theme.fabBackgroundColor
+import com.example.strengthwriter.ui.theme.fabIconColor
 
 @Composable
 fun ListScreen(
     navigationToNewWorkout: (Int) -> Unit
 ) {
+    val testData = TestData.missions
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
         topBar = {},
         content = {
-                  Text(text = "empty Text")
+            it
+            ListContent(missions = testData)
         },
         floatingActionButton = {
             Fab(navigationToNewWorkout = navigationToNewWorkout)
@@ -38,7 +42,8 @@ fun Fab(
     ) {
         Icon(
             imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(R.string.add_workout)
+            contentDescription = stringResource(R.string.add_workout),
+            tint = MaterialTheme.colors.fabIconColor
         )
     }
 }

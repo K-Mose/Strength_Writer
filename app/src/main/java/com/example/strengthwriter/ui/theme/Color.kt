@@ -11,4 +11,8 @@ val Teal200 = Color(0xFF03DAC5)
 
 val Colors.fabBackgroundColor: Color
     @Composable
+    get() = if(isLight) Color.Black else Color.LightGray
+
+val Colors.fabIconColor: Color
+    @Composable
     get() = if(isLight) Color.White else Color.Black
