@@ -8,10 +8,11 @@ import com.example.strengthwriter.utils.Unit
 
 @Entity(tableName = SETS_TABLE)
 data class Sets(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     val id: Int,
     val workoutId: Int? = null,
     val repetition: Int,
     val weight: Double,
     val unit: Unit,
+    val ratio: Int = 0,
 )

@@ -8,13 +8,15 @@ import com.example.strengthwriter.utils.Exercise
 
 @Entity(tableName = WORKOUT_TABLE)
 data class Workout(
-    @PrimaryKey
+    // int 여야 autoGenerate 실행
+    @PrimaryKey(autoGenerate = true)
     val id: Int,
     val missionId: Int? = null,
     val name: Exercise,
+    val memo: String = "",
     val date: String? = null,
     @Ignore
     val sets: List<Sets>?
 ) {
-    constructor(id: Int, missionId: Int?, name: Exercise, date: String?): this(id, missionId, name, date, null)
+    constructor(id: Int, missionId: Int?, name: Exercise, memo: String, date: String?): this(id, missionId, name, memo, date, null)
 }

@@ -15,7 +15,7 @@ interface WorkoutDao {
     fun getWorkout(id: Int): Flow<Workout>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addNewWorkout(workout: Workout)
+    suspend fun addNewWorkout(workout: Workout): Long // id retun type은 long
 
     @Update
     suspend fun updateWorkout(workout: Workout)

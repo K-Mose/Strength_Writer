@@ -16,6 +16,9 @@ interface SetsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertNewSets(sets: Sets)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertNewSetsList(setsList: List<Sets>)
+
     @Update
     suspend fun updateSets(sets: Sets)
 
