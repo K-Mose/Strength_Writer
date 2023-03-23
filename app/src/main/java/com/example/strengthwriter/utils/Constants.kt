@@ -8,4 +8,6 @@ object Constants {
 
     const val LIST_SCREEN = "list/{action}"
     const val DETAIL_SCREEN = "detail/{id}"
+    const val CALCULATOR_SCREEN = "calculator"
+    const val CAL_DETAIL_SCREEN = "cal_detail/{id}"
 }
