@@ -1,14 +1,9 @@
 package com.example.strengthwriter.presentation.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.room.PrimaryKey
 import com.example.strengthwriter.data.SetsDao
 import com.example.strengthwriter.data.WorkoutDao
 import com.example.strengthwriter.data.model.Sets
@@ -20,25 +15,44 @@ import com.example.strengthwriter.utils.Utils.parseDoubleString
 import com.example.strengthwriter.utils.Utils.parseNumberString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.concurrent.thread
 
 @HiltViewModel
 class CalViewModel @Inject constructor(
     private val setsDao: SetsDao,
     private val workoutDao: WorkoutDao
 ): ViewModel() {
+    private var workoutList = listOf<Workout>()
+    private val _workoutState = MutableStateFlow<RequestState<List<Workout>>>(RequestState.Idle)
+    val workoutSets: StateFlow<RequestState<List<Workout>>> = _workoutState
+
+    fun getWorkoutList() {
+        Log.d("${this::class.simpleName}::", "getWorkoutList")
+        _workoutState.value = RequestState.Loading(listOf())
+        viewModelScope.launch(Dispatchers.IO) {
+            val workouts = workoutDao.getAllWorkout()
+            workouts.collect { maps ->
+                Log.d("${this::class.simpleName}::", "it :: $maps")
+                maps.keys.forEach { key ->
+                    maps[key]?.forEach { sets ->
+                        key.sets.add(sets)
+                    }
+                }
+                workoutList = maps.keys.toList()
+                _workoutState.value = RequestState.Success(workoutList)
+            }
+        }
+    }
+
     /*
     workout내의
     sets 리스트 생성 및 관리
      */
-    val workoutName = mutableStateOf("")
-    fun setWorkoutName(name: String) {
-        workoutName.value = name
+    val workoutMemo = mutableStateOf("")
+    fun setWorkoutMemo(memo: String) {
+        workoutMemo.value = memo
     }
 
     val exercise = mutableStateOf(Exercise.DEAD_LIFT)
@@ -111,7 +125,7 @@ class CalViewModel @Inject constructor(
                     missionId = null,
                     name = exercise.value,
                     date = null,
-                    memo = ""
+                    memo = workoutMemo.value
                 )
             )
             Log.d("${this::class.simpleName}::", "workoutId :: $workoutId")

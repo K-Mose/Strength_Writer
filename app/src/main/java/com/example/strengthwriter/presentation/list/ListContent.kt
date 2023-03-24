@@ -87,7 +87,7 @@ private fun ContentItem(
 }
 
 @Composable
-private fun WorkoutItem(
+fun WorkoutItem(
     workout: Workout
 ) {
     Column(
@@ -108,8 +108,8 @@ private fun WorkoutItem(
                     state = scrollState
                 )
         ) {
-            repeat(workout.sets!!.size) { idx ->
-                SetsItem(idx = (idx + 1), sets = workout?.sets[idx])
+            repeat(workout.sets.size) { idx ->
+                SetsItem(idx = (idx + 1), sets = workout.sets[idx])
                 Spacer(modifier = Modifier.width(SPACER_WIDTH))
             }
         }

@@ -7,8 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -20,24 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.strengthwriter.R
-import com.example.strengthwriter.data.model.Sets
 import com.example.strengthwriter.navigation.Screens
 import com.example.strengthwriter.presentation.components.ExerciseDropDown
 import com.example.strengthwriter.presentation.viewmodel.CalViewModel
 import com.example.strengthwriter.presentation.viewmodel._Sets
 import com.example.strengthwriter.ui.theme.PADDING_EXTRA_LARGE
-import com.example.strengthwriter.ui.theme.PADDING_MEDIUM
+import com.example.strengthwriter.ui.theme.PADDING_SMALL
 import com.example.strengthwriter.ui.theme.SPACER_WIDTH
 import com.example.strengthwriter.utils.Exercise
 import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Unit.LBS
-import com.example.strengthwriter.utils.Utils.removeDecimal
 
 @Preview
 @Composable
@@ -68,11 +63,11 @@ private fun CalDetailPreview() {
 
 @Composable
 fun CalDetail(
-        screen: Screens? = null,
+        screen: Screens,
         calViewModel: CalViewModel = hiltViewModel()
 ) {
     val setsState: RequestState<List<_Sets>> by calViewModel.setsState.collectAsState()
-    val name by calViewModel.workoutName
+    val memo by calViewModel.workoutMemo
     val exercise by calViewModel.exercise
 
     val setsList: List<_Sets> = when {
@@ -82,9 +77,9 @@ fun CalDetail(
     }
 
     Calculator(
-        workoutName = name,
-        setWorkoutName = {
-            calViewModel.setWorkoutName(it)
+        workoutMemo = memo,
+        setWorkoutMemo = {
+            calViewModel.setWorkoutMemo(it)
         },
         exercise = exercise,
         onExerciseSelected = { calViewModel.exercise.value = it},
@@ -103,6 +98,7 @@ fun CalDetail(
         },
         addExercise = {
             calViewModel.saveExercise()
+            screen.calculator()
         },
         removeItem = { index ->
             calViewModel.removeSets(index)
@@ -112,8 +108,8 @@ fun CalDetail(
 
 @Composable
 fun Calculator(
-    workoutName: String,
-    setWorkoutName: (String) -> Unit,
+    workoutMemo: String,
+    setWorkoutMemo: (String) -> Unit,
     exercise: Exercise,
     onExerciseSelected: (Exercise) -> Unit,
     setsList: List<_Sets>,
@@ -140,10 +136,27 @@ fun Calculator(
                 fontSize = MaterialTheme.typography.subtitle1.fontSize
             )
 
-            OutlinedButton(onClick = { addExercise() }) {
+            OutlinedButton(onClick = {
+                addExercise()
+            }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add_workout))
                 Text(text = "ADD EXERCISE")
             }
+        }
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .padding(vertical = PADDING_SMALL)
+        ) {
+            OutlinedTextField(
+                value = workoutMemo,
+                onValueChange = { setWorkoutMemo(it)},
+                label = {
+                    Text(text = "Memo")
+                }
+            )
         }
 
         Row (

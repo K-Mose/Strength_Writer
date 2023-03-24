@@ -14,7 +14,7 @@ fun Calculator(
     HomeScaffold(
         screen = screen,
         title = stringResource(R.string.sets_calculator),
-        content = { Text(text = "CAL") },
+        content = { CalListContent() },
         fabClickListener = screen.calDetail
     )
 }

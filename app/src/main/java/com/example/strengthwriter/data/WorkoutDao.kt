@@ -1,12 +1,17 @@
 package com.example.strengthwriter.data
 
 import androidx.room.*
+import com.example.strengthwriter.data.model.Sets
 import com.example.strengthwriter.data.model.Workout
+import com.example.strengthwriter.utils.Constants.SETS_TABLE
 import com.example.strengthwriter.utils.Constants.WORKOUT_TABLE
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkoutDao {
+
+    @Query("SELECT * FROM $WORKOUT_TABLE w LEFT JOIN $SETS_TABLE s ON w.id = s.workoutId ORDER BY w.id, s.id")
+    fun getAllWorkout(): Flow<Map<Workout, List<Sets>>>
 
     @Query("SELECT * FROM $WORKOUT_TABLE WHERE missionId = :missionId ORDER BY id")
     fun getAllWorkout(missionId: Int): Flow<List<Workout>>

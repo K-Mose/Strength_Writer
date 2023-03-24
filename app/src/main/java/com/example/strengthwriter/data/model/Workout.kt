@@ -16,7 +16,7 @@ data class Workout(
     val memo: String = "",
     val date: String? = null,
     @Ignore
-    val sets: List<Sets>?
+    val sets: MutableList<Sets> = mutableListOf()
 ) {
-    constructor(id: Int, missionId: Int?, name: Exercise, memo: String, date: String?): this(id, missionId, name, memo, date, null)
+    constructor(id: Int, missionId: Int?, name: Exercise, memo: String, date: String?): this(id, missionId, name, memo, date, mutableListOf())
 }
