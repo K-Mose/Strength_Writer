@@ -16,10 +16,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.strengthwriter.data.local.TestData
 import com.example.strengthwriter.data.model.DailyMission
 import com.example.strengthwriter.data.model.Sets
 import com.example.strengthwriter.data.model.Workout
+import com.example.strengthwriter.presentation.components.WorkoutItem
 import com.example.strengthwriter.ui.theme.*
 import com.example.strengthwriter.utils.Utils.removeDecimal
 
@@ -52,7 +54,7 @@ private fun ContentItem(
     Card(
         modifier = Modifier
             .fillMaxWidth(),
-        elevation = 5.dp,
+        elevation = CARD_ELEVATION_5,
         backgroundColor = Color.LightGray
     ) {
         Surface(
@@ -79,71 +81,15 @@ private fun ContentItem(
                         .padding(horizontal = PADDING_SMALL)
                 )
                 repeat(workouts.size) { idx ->
-                    WorkoutItem(workout = workouts[idx])
+                    WorkoutItem(
+                        workout = workouts[idx]
+                    )
                 }
             }
         }
     }
 }
 
-@Composable
-fun WorkoutItem(
-    workout: Workout
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(PADDING_SMALL)
-    ) {
-        val scrollState = rememberScrollState()
-        Text(
-            text = workout.name.getName(),
-            fontSize = MaterialTheme.typography.body1.fontSize,
-            fontWeight = FontWeight.Bold
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(
-                    state = scrollState
-                )
-        ) {
-            repeat(workout.sets.size) { idx ->
-                SetsItem(idx = (idx + 1), sets = workout.sets[idx])
-                Spacer(modifier = Modifier.width(SPACER_WIDTH))
-            }
-        }
-    }
-}
-
-@Composable
-private fun SetsItem(
-    idx: Int,
-    sets: Sets
-) {
-    Box(
-        modifier = Modifier
-            .border(
-                shape = RoundedCornerShape(size = CORNER_SMALL),
-                width = 1.dp,
-                color = Color.LightGray,
-            )
-            .padding(all = PADDING_SMALL)
-    ) {
-        Row {
-            Text(
-                fontSize = MaterialTheme.typography.caption.fontSize,
-                text = "${idx}. "
-            )
-            Text(
-                text = "${sets.repetition} rep / ${sets.weight.removeDecimal()} ${sets.unit.name.lowercase()}",
-                fontSize = MaterialTheme.typography.subtitle2.fontSize,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
 
 @Composable
 @Preview

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WorkoutDao {
 
-    @Query("SELECT * FROM $WORKOUT_TABLE w LEFT JOIN $SETS_TABLE s ON w.id = s.workoutId ORDER BY w.id, s.id")
+    @Query("SELECT * FROM $WORKOUT_TABLE w LEFT JOIN $SETS_TABLE s ON w.id = s.workoutId WHERE missionId is null ORDER BY w.id, s.id")
     fun getAllWorkout(): Flow<Map<Workout, List<Sets>>>
 
     @Query("SELECT * FROM $WORKOUT_TABLE WHERE missionId = :missionId ORDER BY id")
