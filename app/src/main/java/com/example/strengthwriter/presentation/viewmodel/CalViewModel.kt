@@ -124,8 +124,8 @@ class CalViewModel @Inject constructor(
                     id =  0,
                     missionId = null,
                     name = exercise.value,
-                    date = null,
-                    memo = workoutMemo.value
+                    memo = workoutMemo.value,
+                    date = null
                 )
             )
             Log.d("${this::class.simpleName}::", "workoutId :: $workoutId")
@@ -136,6 +136,15 @@ class CalViewModel @Inject constructor(
             )
         }
     }
+
+    fun getWorkout(): Workout = Workout(
+        id = 0,
+        missionId = 0,
+        name = exercise.value,
+        memo = workoutMemo.value,
+        date = null,
+        sets = _setsList.map { it.toSets(null) }.toMutableList()
+    )
 }
 
 data class _Sets(
@@ -147,9 +156,9 @@ data class _Sets(
     fun toSets(workoutId: Int?): Sets = Sets(
         id = 0,
         workoutId = workoutId,
-        repetition = this.repetition.toInt(),
-        weight = this.weight.toDouble(),
+        repetition = this.repetition.parseNumberString().toInt(),
+        weight = this.weight.parseDoubleString().toDouble(),
         unit = this.unit,
-        ratio = this.ratio.toInt(),
+        ratio = this.ratio.parseNumberString().toInt(),
     )
 }

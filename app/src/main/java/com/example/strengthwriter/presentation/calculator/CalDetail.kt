@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.strengthwriter.R
-import com.example.strengthwriter.navigation.Screens
+import com.example.strengthwriter.data.model.Workout
 import com.example.strengthwriter.presentation.components.ExerciseDropDown
 import com.example.strengthwriter.presentation.viewmodel.CalViewModel
 import com.example.strengthwriter.presentation.viewmodel._Sets
@@ -63,8 +63,10 @@ private fun CalDetailPreview() {
 
 @Composable
 fun CalDetail(
-        screen: Screens,
-        calViewModel: CalViewModel = hiltViewModel()
+    navigateTo: () -> Unit,
+    isPopup: Boolean = false,
+    popupReturn: (Workout) -> Unit = {},
+    calViewModel: CalViewModel = hiltViewModel()
 ) {
     val setsState: RequestState<List<_Sets>> by calViewModel.setsState.collectAsState()
     val memo by calViewModel.workoutMemo
@@ -97,8 +99,11 @@ fun CalDetail(
             calViewModel.addSets(getEmptySets())
         },
         addExercise = {
-            calViewModel.saveExercise()
-            screen.calculator()
+            if (!isPopup)
+                calViewModel.saveExercise()
+            else
+                popupReturn(calViewModel.getWorkout())
+            navigateTo()
         },
         removeItem = { index ->
             calViewModel.removeSets(index)
@@ -123,6 +128,7 @@ fun Calculator(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
             .padding(all = PADDING_EXTRA_LARGE)
     ) {
         Row(

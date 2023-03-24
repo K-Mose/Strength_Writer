@@ -12,20 +12,34 @@ import com.example.strengthwriter.ui.theme.AppBarColor
 @Composable
 fun MyAppBar(
    title: String,
-   menuClick: () -> Unit
+   isNavigation: Boolean = false,
+   navigationIcon: ActionItem? = null,
+   isActionButton: Boolean = false,
+   actionIcon: ActionItem? = null
 ) {
    TopAppBar(
       backgroundColor = AppBarColor,
       title = { Text(text = title)},
       contentColor = Color.White,
       navigationIcon = {
-         IconButton(onClick = {
-            menuClick()
-         }) {
-            Icon(
-               imageVector = Icons.Default.Menu,
-               contentDescription = stringResource(R.string.menu_icon)
-            )
+         if (isNavigation) {
+            IconButton(onClick = { navigationIcon!!.onClick() }) {
+               Icon(
+                  imageVector = navigationIcon!!.icon,
+                  contentDescription = stringResource(R.string.menu_icon)
+               )
+            }
+         }
+      },
+      actions = {
+         if (isActionButton) {
+            IconButton(onClick = { actionIcon!!.onClick() }) {
+               Icon(
+                  imageVector = actionIcon!!.icon,
+                  contentDescription = stringResource(R.string.topbar_action),
+                  tint = Color.White
+               )
+            }
          }
       }
    )

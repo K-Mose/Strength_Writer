@@ -12,19 +12,23 @@ object Utils {
     }
 
     fun String.parseNumberString(): String =
-        if(Regex("^\\d*$").matches(this))
-            this
-        else
-            Regex("\\D").replace(this,"")
+        if (this.isNotEmpty())
+            if(Regex("^\\d*$").matches(this))
+                this
+            else
+                Regex("\\D").replace(this,"")
+        else "0"
 
 
     fun String.parseDoubleString(): String =
-        if(Regex("^\\d*.\\d+$").matches(this)) this
-            else {
-            this.split(".").joinToString(".") {
-                Regex("\\D").replace(it, "")
+        if (this.isNotEmpty())
+            if(Regex("^\\d*.\\d+$").matches(this)) this
+                else {
+                this.split(".").joinToString(".") {
+                    Regex("\\D").replace(it, "")
+                }
             }
-        }
+        else "0.0"
 
 
     fun Date.toFormattedString(): String {

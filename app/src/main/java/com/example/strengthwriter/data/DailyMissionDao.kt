@@ -14,7 +14,7 @@ interface DailyMissionDao {
     fun getMissions(id: Int): Flow<DailyMission>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertNewDailyMission(mission: DailyMission)
+    suspend fun insertNewDailyMission(mission: DailyMission): Long
 
     @Update
     suspend fun updateDailyMission(mission: DailyMission)

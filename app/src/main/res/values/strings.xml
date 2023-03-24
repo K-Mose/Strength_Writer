@@ -7,4 +7,6 @@
     <string name="title">Title</string>
     <string name="menu_icon">Menu Icon</string>
     <string name="sets_calculator">Sets Calc.</string>
+    <string name="topbar_action">TopBar Action</string>
+    <string name="daily_mission">Daily Mission</string>
 </resources>

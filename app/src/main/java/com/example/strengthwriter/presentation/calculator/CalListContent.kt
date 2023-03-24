@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.strengthwriter.data.model.Workout
+import com.example.strengthwriter.presentation.components.WorkoutCard
 import com.example.strengthwriter.presentation.components.WorkoutItem
 import com.example.strengthwriter.presentation.viewmodel.CalViewModel
 import com.example.strengthwriter.ui.theme.CARD_ELEVATION_5
@@ -35,20 +36,8 @@ fun CalListContent(
     LazyColumn(
         modifier = Modifier.padding(all = PADDING_LARGE)
     ) {
-        items(workoutList) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-
-                    },
-                elevation = CARD_ELEVATION_5
-            ) {
-                WorkoutItem(
-                    workout = it
-                )
-            }
-            Spacer(modifier = Modifier.height(SPACER_MEDIUM_HEIGHT))
+        items(workoutList) { workout ->
+            WorkoutCard(workout = workout)
         }
     }
 }

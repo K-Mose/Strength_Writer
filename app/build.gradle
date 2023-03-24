@@ -20,6 +20,7 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        archivesBaseName = "strength" // apk 이름 지정
     }
 
     buildTypes {

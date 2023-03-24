@@ -2,6 +2,8 @@ package com.example.strengthwriter.presentation.components
 
 import androidx.compose.material.DrawerValue
 import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -25,12 +27,17 @@ fun HomeScaffold(
         scaffoldState = scaffoldState,
         topBar = {
             MyAppBar(
-                title = title
-            ) {
-                coroutineScope.launch {
-                    scaffoldState.drawerState.open()
-                }
-            }
+                title = title,
+                isNavigation = true,
+                navigationIcon = ActionItem(
+                    icon = Icons.Filled.Menu,
+                    onClick = {
+                        coroutineScope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    }
+                )
+            )
         },
         drawerContent = {
             DrawerContent(
