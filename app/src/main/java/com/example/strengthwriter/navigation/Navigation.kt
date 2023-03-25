@@ -12,7 +12,6 @@ import com.example.strengthwriter.presentation.calculator.CalDetail
 import com.example.strengthwriter.presentation.calculator.Calculator
 import com.example.strengthwriter.presentation.item.DetailScreen
 import com.example.strengthwriter.presentation.list.ListScreen
-import com.example.strengthwriter.presentation.viewmodel.CalViewModel
 import com.example.strengthwriter.presentation.viewmodel.DetailViewModel
 import com.example.strengthwriter.utils.Constants.CALCULATOR_SCREEN
 import com.example.strengthwriter.utils.Constants.CAL_DETAIL_SCREEN
@@ -44,7 +43,7 @@ fun Navigation(
             })
         ) { backstackEntry ->
             DetailScreen(
-                navController = navController,
+                screen = screen
             )
         }
 
@@ -65,7 +64,7 @@ fun Navigation(
             val id = backstackEntry.arguments?.getInt("id")
 
             CalDetail(
-                screen = screen
+                navigateTo = screen.calculator
             )
         }
     }

@@ -27,14 +27,20 @@ class ListViewModel @Inject constructor(
         _dailyMissionState.value = RequestState.Loading(dailyMissionList)
         viewModelScope.launch(Dispatchers.IO) {
             dailyMissionDao.getAllMissions().collect { missions ->
+                val list = mutableListOf<DailyMission>()
                 Log.d("${this::class.simpleName}::", "missions :: $missions")
-//                missions.keys.forEach { missionKey ->
-//
-//                }
-//                dailyMissionList = missions.keys.toList()
+                missions.forEach { mW ->
+                    mW.workouts.forEach { wS ->
+                        wS.workout.sets.addAll(wS.sets)
+                        mW.mission.workout.add(wS.workout)
+                    }
+                    list.add(mW.mission)
+                }
+                dailyMissionList = list
             }
+            Thread.sleep(50)
+            _dailyMissionState.value = RequestState.Success(dailyMissionList)
         }
-        _dailyMissionState.value = RequestState.Success(dailyMissionList)
     }
 
 }

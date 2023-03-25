@@ -17,7 +17,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.strengthwriter.data.local.TestData
 import com.example.strengthwriter.data.model.DailyMission
 import com.example.strengthwriter.data.model.Sets
 import com.example.strengthwriter.data.model.Workout
@@ -94,6 +93,4 @@ private fun ContentItem(
 @Composable
 @Preview
 private fun ListPreview() {
-    val testData = TestData.missions
-    ListContent(missions = testData)
 }
