@@ -1,9 +1,12 @@
 package com.example.strengthwriter.presentation.list
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.strengthwriter.data.model.DailyMission
 import com.example.strengthwriter.navigation.Screens
@@ -17,7 +20,7 @@ fun ListScreen(
     screen: Screens,
     navigationToNewWorkout: (Int) -> Unit,
 ) {
-    val missionState by listViewModel.dailyMissionState
+    val missionState by listViewModel.dailyMissionState.collectAsState()
     LaunchedEffect(missionState) {
         listViewModel.getDailyMissionList()
     }
@@ -26,7 +29,6 @@ fun ListScreen(
         is RequestState.Loading<List<DailyMission>> -> (missionState as RequestState.Loading<List<DailyMission>>).data
         else -> listOf()
     }
-    Log.d("ListScreen::", "missions :: $missions")
     HomeScaffold(
         screen = screen,
         content = {

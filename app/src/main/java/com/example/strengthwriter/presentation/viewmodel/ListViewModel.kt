@@ -9,6 +9,8 @@ import com.example.strengthwriter.data.model.DailyMission
 import com.example.strengthwriter.utils.RequestState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,8 +22,8 @@ class ListViewModel @Inject constructor(
 ): ViewModel() {
 
     private var dailyMissionList = listOf<DailyMission>()
-    private val _dailyMissionState = mutableStateOf<RequestState<List<DailyMission>>>(RequestState.Idle)
-    val dailyMissionState = _dailyMissionState
+    private val _dailyMissionState = MutableStateFlow<RequestState<List<DailyMission>>>(RequestState.Idle)
+    val dailyMissionState: StateFlow<RequestState<List<DailyMission>>> = _dailyMissionState
 
     fun getDailyMissionList() {
         _dailyMissionState.value = RequestState.Loading(dailyMissionList)
@@ -37,9 +39,8 @@ class ListViewModel @Inject constructor(
                     list.add(mW.mission)
                 }
                 dailyMissionList = list
+                _dailyMissionState.value = RequestState.Success(dailyMissionList)
             }
-            Thread.sleep(50)
-            _dailyMissionState.value = RequestState.Success(dailyMissionList)
         }
     }
 
