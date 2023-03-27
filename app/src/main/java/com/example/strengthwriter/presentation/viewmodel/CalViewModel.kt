@@ -147,6 +147,16 @@ class CalViewModel @Inject constructor(
         date = null,
         sets = _setsList.map { it.toSets(null) }.toMutableList()
     )
+
+    fun removeWorkout(workout: Workout) {
+        // remove sets, remove workout
+        viewModelScope.launch(Dispatchers.IO) {
+            workout.sets.forEach { sets ->
+                setsDao.deleteSets(sets = sets)
+            }
+            workoutDao.deleteWorkout(workout = workout)
+        }
+    }
 }
 
 data class _Sets(

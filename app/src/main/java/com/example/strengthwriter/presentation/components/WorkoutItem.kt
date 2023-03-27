@@ -1,12 +1,10 @@
 package com.example.strengthwriter.presentation.components
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -66,7 +64,7 @@ fun WorkoutItem(
         ) {
             repeat(workout.sets.size) { idx ->
                 SetsItem(idx = (idx + 1), sets = workout.sets[idx])
-                Spacer(modifier = Modifier.width(SPACER_WIDTH))
+                Spacer(modifier = Modifier.width(SPACER_SMALL_WIDTH))
             }
         }
     }

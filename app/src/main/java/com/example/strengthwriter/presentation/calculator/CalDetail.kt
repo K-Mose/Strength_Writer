@@ -29,7 +29,7 @@ import com.example.strengthwriter.presentation.viewmodel.CalViewModel
 import com.example.strengthwriter.presentation.viewmodel._Sets
 import com.example.strengthwriter.ui.theme.PADDING_EXTRA_LARGE
 import com.example.strengthwriter.ui.theme.PADDING_SMALL
-import com.example.strengthwriter.ui.theme.SPACER_WIDTH
+import com.example.strengthwriter.ui.theme.SPACER_SMALL_WIDTH
 import com.example.strengthwriter.utils.Exercise
 import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Unit.LBS
@@ -266,7 +266,7 @@ private fun DetailItem(
                     fontSize = MaterialTheme.typography.caption.fontSize
                 )}
             )
-            Spacer(modifier = Modifier.width(SPACER_WIDTH))
+            Spacer(modifier = Modifier.width(SPACER_SMALL_WIDTH))
             OutlinedTextField(
                 modifier = Modifier
                     .width(100.dp),
@@ -285,7 +285,7 @@ private fun DetailItem(
                     )
                 }
             )
-            Spacer(modifier = Modifier.width(SPACER_WIDTH))
+            Spacer(modifier = Modifier.width(SPACER_SMALL_WIDTH))
             OutlinedTextField(
                 modifier = Modifier
                     .width(100.dp),
@@ -304,7 +304,7 @@ private fun DetailItem(
                     )
                 },
             )
-            Spacer(modifier = Modifier.width(SPACER_WIDTH))
+            Spacer(modifier = Modifier.width(SPACER_SMALL_WIDTH))
             Surface(
                 modifier = Modifier
                     .size(24.dp)

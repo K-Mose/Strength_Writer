@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.strengthwriter.data.model.Workout
+import com.example.strengthwriter.presentation.components.SwipeScreen
 import com.example.strengthwriter.presentation.components.WorkoutCard
 import com.example.strengthwriter.presentation.components.WorkoutItem
 import com.example.strengthwriter.presentation.viewmodel.CalViewModel
@@ -34,10 +36,16 @@ fun CalListContent(
     }
     Log.d("CalListContent", "$workoutList")
     LazyColumn(
-        modifier = Modifier.padding(all = PADDING_LARGE)
+        modifier = Modifier.padding(vertical = PADDING_LARGE)
     ) {
         items(workoutList) { workout ->
-            WorkoutCard(workout = workout)
+            SwipeScreen(
+                onSwipeToDelete = {
+                    calViewModel.removeWorkout(workout)
+                }
+            ) {
+                WorkoutCard(workout = workout)
+            }
         }
     }
 }
