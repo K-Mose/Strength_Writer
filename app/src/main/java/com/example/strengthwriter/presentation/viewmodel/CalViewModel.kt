@@ -65,6 +65,8 @@ class CalViewModel @Inject constructor(
 
     fun initList() {
         _setsState.value = RequestState.Idle
+        exercise.value = Exercise.DEAD_LIFT
+        workoutMemo.value = ""
     }
 
     fun getSetsList() {

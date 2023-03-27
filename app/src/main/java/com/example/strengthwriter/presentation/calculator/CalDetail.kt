@@ -71,10 +71,12 @@ fun CalDetail(
     val setsState: RequestState<List<_Sets>> by calViewModel.setsState.collectAsState()
     val memo by calViewModel.workoutMemo
     val exercise by calViewModel.exercise
-
-    val setsList: List<_Sets> = when {
-        setsState is RequestState.Success -> (setsState as RequestState.Success<List<_Sets>>).data
-        setsState is RequestState.Loading -> (setsState as RequestState.Loading<List<_Sets>>).data
+    LaunchedEffect(key1 = true) {
+        calViewModel.initList()
+    }
+    val setsList: List<_Sets> = when (setsState) {
+        is RequestState.Success -> (setsState as RequestState.Success<List<_Sets>>).data
+        is RequestState.Loading -> (setsState as RequestState.Loading<List<_Sets>>).data
         else -> emptyList<_Sets>()
     }
 
