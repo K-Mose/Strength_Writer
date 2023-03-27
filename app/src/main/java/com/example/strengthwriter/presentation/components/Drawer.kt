@@ -13,10 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.strengthwriter.ui.theme.PADDING_DRAWER
-import com.example.strengthwriter.ui.theme.SPACER_LARGE_HEIGHT
-import com.example.strengthwriter.ui.theme.SPACER_MEDIUM_HEIGHT
-import com.example.strengthwriter.ui.theme.SPACER_WIDTH
+import androidx.compose.ui.unit.dp
+import com.example.strengthwriter.ui.theme.*
 
 // drawer - https://semicolonspace.com/jetpack-compose-navigation-drawer/
 
@@ -92,12 +90,14 @@ fun NavigationListItem(
         Icon(
             painter = item.icon,
             contentDescription = item.icon.toString(),
+            modifier = Modifier.size(34.dp),
             tint = Color.White
         )
-        Spacer(modifier = Modifier.size(SPACER_WIDTH))
+        Spacer(modifier = Modifier.size(SPACER_LARGE_WIDTH))
         Text(
             text = item.name,
-            color = Color.White
+            color = Color.White,
+            fontSize = MaterialTheme.typography.h5.fontSize
         )
     }
 }
