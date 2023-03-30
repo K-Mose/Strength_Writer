@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -20,6 +21,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -88,6 +90,8 @@ fun CalDetail(
         else -> emptyList<_Sets>()
     }
 
+    val focusList = calViewModel.focusList
+
     Calculator(
         workoutMemo = memo,
         setWorkoutMemo = {
@@ -106,6 +110,7 @@ fun CalDetail(
             calViewModel.updateRatio(index, ratio)
         },
         addItem = {
+            calViewModel.addFocusListItem()
             calViewModel.addSets(getEmptySets())
         },
         addExercise = {
@@ -116,8 +121,10 @@ fun CalDetail(
             navigateTo()
         },
         removeItem = { index ->
+            calViewModel.removeFocusListItem()
             calViewModel.removeSets(index)
-        }
+        },
+        focusList = focusList
     )
 }
 
@@ -133,13 +140,20 @@ fun Calculator(
     updateRatio: (Int, String) -> Unit,
     addItem: () -> Unit,
     removeItem: (Int) -> Unit,
-    addExercise: () -> Unit
+    addExercise: () -> Unit,
+    focusList: List<FocusRequester>
 ) {
+    val focusManager = LocalFocusManager.current
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
             .padding(all = PADDING_EXTRA_LARGE)
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    focusManager.clearFocus()
+                }
+            }
     ) {
         Row(
             modifier = Modifier
@@ -207,7 +221,9 @@ fun Calculator(
                 updateReps = updateReps,
                 updateWeight = updateWeight,
                 updateRatio = updateRatio,
-                removeItem = removeItem
+                removeItem = removeItem,
+                focusManager = focusManager,
+                focusList = focusList
             )
         }
     }
@@ -220,20 +236,10 @@ private fun DetailList(
     updateWeight: (Int, String) -> Unit,
     updateRatio: (Int, String) -> Unit,
     removeItem: (Int) -> Unit,
+    focusManager:FocusManager,
+    focusList: List<FocusRequester>
 ) {
     Log.d("CALCULATOR::DetailList", "$setsList")
-    val focusList by remember {
-        mutableStateOf<List<FocusRequester>>(
-            listOf(
-                FocusRequester(),
-                FocusRequester(),
-                FocusRequester(),
-                FocusRequester(),
-                FocusRequester(),
-                FocusRequester(),
-            )
-        )
-    }
     LazyColumn {
         itemsIndexed(setsList) {index, sets ->
             DetailItem(
@@ -244,10 +250,12 @@ private fun DetailList(
                 updateRatio = updateRatio,
                 removeItem = removeItem,
                 focusList = focusList,
+                focusManager = focusManager,
                 isLast = (index+1) == setsList.size
             )
         }
     }
+    Log.d("CALCULATOR::DetailList", "${focusList.size} $focusList")
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -260,6 +268,7 @@ private fun DetailItem(
     updateRatio: (Int, String) -> Unit,
     removeItem: (Int) -> Unit,
     focusList:List<FocusRequester>,
+    focusManager:FocusManager = LocalFocusManager.current,
     isLast: Boolean = false
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -268,8 +277,6 @@ private fun DetailItem(
     val reps = sets.repetition
     val weight = sets.weight
     val ratio = sets.ratio
-
-    val focusManager = LocalFocusManager.current
     val weightFocus = FocusRequester()
     val ratioFocus = FocusRequester()
 
@@ -288,6 +295,12 @@ private fun DetailItem(
                     .focusRequester(focusList[index])
                     .focusProperties {
                         next = weightFocus
+                    }
+                    .onFocusEvent { focusState ->
+                        if (focusState.isFocused) {
+                            keyboardController?.hide()
+                            keyboardController?.show()
+                        }
                     }
                 ,
                 value = when (reps) {
@@ -315,6 +328,12 @@ private fun DetailItem(
                     .focusProperties {
                         next = ratioFocus
                     }
+                    .onFocusEvent { focusState ->
+                        if (focusState.isFocused) {
+                            keyboardController?.hide()
+                            keyboardController?.show()
+                        }
+                    }
                 ,
                 value = when (weight) {
                     "0.0" -> ""
@@ -338,7 +357,13 @@ private fun DetailItem(
                     .width(100.dp)
                     .focusRequester(ratioFocus)
                     .focusProperties {
-                        next = focusList[index+1]
+                        next = focusList[if(!isLast) index + 1 else index]
+                    }
+                    .onFocusEvent { focusState ->
+                        if (focusState.isFocused) {
+                            keyboardController?.hide()
+                            keyboardController?.show()
+                        }
                     }
                 ,
                 value = when (ratio) {

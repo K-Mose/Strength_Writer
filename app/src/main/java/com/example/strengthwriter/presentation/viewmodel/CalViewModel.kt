@@ -2,6 +2,7 @@ package com.example.strengthwriter.presentation.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.*
+import androidx.compose.ui.focus.FocusRequester
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.strengthwriter.data.SetsDao
@@ -24,6 +25,15 @@ class CalViewModel @Inject constructor(
     private val setsDao: SetsDao,
     private val workoutDao: WorkoutDao
 ): ViewModel() {
+    val focusList = mutableListOf<FocusRequester>()
+    fun addFocusListItem() {
+        focusList.add(FocusRequester())
+    }
+
+    fun removeFocusListItem() {
+        focusList.removeLast()
+    }
+
     private var workoutList = listOf<Workout>()
     private val _workoutState = MutableStateFlow<RequestState<List<Workout>>>(RequestState.Idle)
     val workoutSets: StateFlow<RequestState<List<Workout>>> = _workoutState
