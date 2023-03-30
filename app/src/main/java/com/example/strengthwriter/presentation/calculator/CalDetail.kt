@@ -1,6 +1,7 @@
 package com.example.strengthwriter.presentation.calculator
 
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,6 +9,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -41,6 +44,8 @@ import com.example.strengthwriter.ui.theme.SPACER_SMALL_WIDTH
 import com.example.strengthwriter.utils.Exercise
 import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Unit.LBS
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
@@ -258,7 +263,7 @@ private fun DetailList(
     Log.d("CALCULATOR::DetailList", "${focusList.size} $focusList")
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun DetailItem(
     index: Int,
@@ -268,7 +273,7 @@ private fun DetailItem(
     updateRatio: (Int, String) -> Unit,
     removeItem: (Int) -> Unit,
     focusList:List<FocusRequester>,
-    focusManager:FocusManager = LocalFocusManager.current,
+    focusManager: FocusManager = LocalFocusManager.current,
     isLast: Boolean = false
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -280,7 +285,12 @@ private fun DetailItem(
     val weightFocus = FocusRequester()
     val ratioFocus = FocusRequester()
 
-    Card() {
+    val coroutineScope = rememberCoroutineScope()
+    val bringIntoViewRequester = remember { BringIntoViewRequester()}
+
+    Card(
+        modifier = Modifier.bringIntoViewRequester(bringIntoViewRequester)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -297,10 +307,10 @@ private fun DetailItem(
                         next = weightFocus
                     }
                     .onFocusEvent { focusState ->
-                        if (focusState.isFocused) {
-                            keyboardController?.hide()
-                            keyboardController?.show()
-                        }
+                        if (focusState.isFocused)
+                            coroutineScope.launch {
+                                bringIntoViewRequester.bringIntoView()
+                            }
                     }
                 ,
                 value = when (reps) {
@@ -329,10 +339,10 @@ private fun DetailItem(
                         next = ratioFocus
                     }
                     .onFocusEvent { focusState ->
-                        if (focusState.isFocused) {
-                            keyboardController?.hide()
-                            keyboardController?.show()
-                        }
+                        if (focusState.isFocused)
+                            coroutineScope.launch {
+                                bringIntoViewRequester.bringIntoView()
+                            }
                     }
                 ,
                 value = when (weight) {
@@ -360,10 +370,10 @@ private fun DetailItem(
                         next = focusList[if(!isLast) index + 1 else index]
                     }
                     .onFocusEvent { focusState ->
-                        if (focusState.isFocused) {
-                            keyboardController?.hide()
-                            keyboardController?.show()
-                        }
+                        if (focusState.isFocused)
+                            coroutineScope.launch {
+                                bringIntoViewRequester.bringIntoView()
+                            }
                     }
                 ,
                 value = when (ratio) {
