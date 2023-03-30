@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,9 +16,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,6 +55,7 @@ private fun CalDetailPreview() {
         updateWeight = { _, _ -> },
         updateRatio = { _, _ -> },
         removeItem = { _ -> },
+        focusList = listOf()
     )
     DetailItem(
         sets = getEmptySets(),
@@ -57,6 +64,7 @@ private fun CalDetailPreview() {
         updateWeight = { _, _ -> },
         updateRatio = { _, _ -> },
         removeItem = { _ -> },
+        focusList = listOf()
     )
     }
 }
@@ -214,6 +222,18 @@ private fun DetailList(
     removeItem: (Int) -> Unit,
 ) {
     Log.d("CALCULATOR::DetailList", "$setsList")
+    val focusList by remember {
+        mutableStateOf<List<FocusRequester>>(
+            listOf(
+                FocusRequester(),
+                FocusRequester(),
+                FocusRequester(),
+                FocusRequester(),
+                FocusRequester(),
+                FocusRequester(),
+            )
+        )
+    }
     LazyColumn {
         itemsIndexed(setsList) {index, sets ->
             DetailItem(
@@ -222,12 +242,15 @@ private fun DetailList(
                 updateReps = updateReps,
                 updateWeight = updateWeight,
                 updateRatio = updateRatio,
-                removeItem = removeItem
+                removeItem = removeItem,
+                focusList = focusList,
+                isLast = (index+1) == setsList.size
             )
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun DetailItem(
     index: Int,
@@ -236,11 +259,20 @@ private fun DetailItem(
     updateWeight: (Int, String) -> Unit,
     updateRatio: (Int, String) -> Unit,
     removeItem: (Int) -> Unit,
+    focusList:List<FocusRequester>,
+    isLast: Boolean = false
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Log.d("CALCULATOR::DetailItem", "$sets / $index")
     val reps = sets.repetition
     val weight = sets.weight
     val ratio = sets.ratio
+
+    val focusManager = LocalFocusManager.current
+    val weightFocus = FocusRequester()
+    val ratioFocus = FocusRequester()
+
     Card() {
         Row(
             modifier = Modifier
@@ -252,15 +284,24 @@ private fun DetailItem(
             OutlinedTextField(
                 modifier = Modifier
                     .width(100.dp)
-                    .background(Color.White),
+                    .background(Color.White)
+                    .focusRequester(focusList[index])
+                    .focusProperties {
+                        next = weightFocus
+                    }
+                ,
                 value = when (reps) {
                     "0" -> ""
                     else -> reps
                 },
                 onValueChange = { reps -> updateReps(index, reps) },
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
                 ),
+                keyboardActions = KeyboardActions(onNext = {
+                    focusManager.moveFocus(FocusDirection.Next)
+                }),
                 label = { Text(
                     text = "Reps",
                     fontSize = MaterialTheme.typography.caption.fontSize
@@ -269,14 +310,20 @@ private fun DetailItem(
             Spacer(modifier = Modifier.width(SPACER_SMALL_WIDTH))
             OutlinedTextField(
                 modifier = Modifier
-                    .width(100.dp),
+                    .width(100.dp)
+                    .focusRequester(weightFocus)
+                    .focusProperties {
+                        next = ratioFocus
+                    }
+                ,
                 value = when (weight) {
                     "0.0" -> ""
                     else -> weight
                 },
                 onValueChange = { weight -> updateWeight(index, weight)},
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
                 ),
                 label = {
                     Text(
@@ -288,15 +335,27 @@ private fun DetailItem(
             Spacer(modifier = Modifier.width(SPACER_SMALL_WIDTH))
             OutlinedTextField(
                 modifier = Modifier
-                    .width(100.dp),
+                    .width(100.dp)
+                    .focusRequester(ratioFocus)
+                    .focusProperties {
+                        next = focusList[index+1]
+                    }
+                ,
                 value = when (ratio) {
                     "0" -> ""
                     else -> ratio
                 },
                 onValueChange = { ratio -> updateRatio(index, ratio)},
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Decimal
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = if(isLast) ImeAction.Done else ImeAction.Next
                 ),
+                keyboardActions = KeyboardActions (
+                        onDone = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                        }
+                    ),
                 label = {
                     Text(
                         text = "Ratio",
