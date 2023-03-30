@@ -3,12 +3,10 @@ package com.example.strengthwriter.presentation.item
 import android.app.DatePickerDialog
 import android.icu.util.Calendar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -20,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,10 +33,11 @@ import com.example.strengthwriter.presentation.calculator.CalDetail
 import com.example.strengthwriter.presentation.components.ActionItem
 import com.example.strengthwriter.presentation.components.MyAppBar
 import com.example.strengthwriter.presentation.components.WorkoutCard
+import com.example.strengthwriter.presentation.components.WorkoutItem
 import com.example.strengthwriter.presentation.viewmodel.DetailViewModel
 import com.example.strengthwriter.ui.theme.PADDING_MEDIUM
 import com.example.strengthwriter.ui.theme.PADDING_SMALL
-import com.example.strengthwriter.utils.Exercise
+import com.example.strengthwriter.ui.theme.SPACER_LARGE_WIDTH
 import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Utils.toFormattedString
 import java.util.*
@@ -89,7 +89,8 @@ fun DetailScreen(
                 updateDate = detailViewModel::updateDate,
                 title = title,
                 updateTitle = detailViewModel::updateTitle,
-                addExercise = { workoutPopup.value = true}
+                addExercise = { workoutPopup.value = true},
+                loadExercise = { }
             )
             Surface(
                 modifier = Modifier
@@ -118,7 +119,8 @@ fun Heading(
     updateDate: (String) -> Unit,
     title: String,
     updateTitle: (String) -> Unit,
-    addExercise: () -> Unit
+    addExercise: () -> Unit,
+    loadExercise: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -145,7 +147,9 @@ fun Heading(
 
     Column {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White),
             value = title,
             onValueChange = {
                 updateTitle(it)
@@ -157,8 +161,10 @@ fun Heading(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = PADDING_SMALL),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(vertical = PADDING_SMALL)
+                .background(Color.White),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedButton(onClick = { datePickerDialog.show() }) {
                 Text(
@@ -167,13 +173,44 @@ fun Heading(
                     color = Color.Black
                 )
             }
-            OutlinedButton(onClick = {
-                addExercise()
-            }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add_workout))
-                Text(text = "ADD EXERCISE")
-        }
+            Row(
+                modifier = Modifier.padding(horizontal = PADDING_MEDIUM),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    elevation = 5.dp,
+                ) {
+                    IconButton(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(color = Color.White),
+                        onClick = {
+                            loadExercise()
+                        }
+                    ) {
+                        Icon(painter = painterResource(id = R.drawable.ic_get_24), contentDescription = "Load Workout Data")
+                    }
+                }
+                Spacer(modifier = Modifier.width(width = SPACER_LARGE_WIDTH))
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    elevation = 5.dp,
+                ) {
+                    IconButton(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(color = Color.White),
+                        onClick = {
+                            addExercise()
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add_workout))
+                    }
+                }
             }
+        }
     }
 }
 
@@ -198,14 +235,44 @@ fun WorkoutPopup(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun LoadPopup(
+    workoutList: List<Workout>,
+    itemClickListener: (Workout) -> Unit,
+    closePopup: () -> Unit
+) {
+    Popup(
+        properties = PopupProperties(
+            focusable = true,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        ),
+        onDismissRequest = { closePopup() }
+    ) {
+        LazyColumn {
+            items(workoutList) { workout ->
+                Surface(
+                    onClick = {
+                        itemClickListener(workout)
+                    }
+                ) {
+                    WorkoutItem(workout = workout)
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun HeadingPreview() {
     Heading(
-        title = "asdasd",
+        title = "title",
         updateTitle = {},
         date = "20220301",
         updateDate = {},
-        addExercise = {}
+        addExercise = {},
+        loadExercise = {}
     )
 }
