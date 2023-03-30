@@ -223,7 +223,8 @@ fun WorkoutPopup(
         properties = PopupProperties(
             focusable = true,
             dismissOnBackPress = true,
-            dismissOnClickOutside = true
+            dismissOnClickOutside = true,
+            clippingEnabled = false
         ),
         onDismissRequest = { navigateTo()}
     ) {
