@@ -289,7 +289,7 @@ private fun DetailItem(
     val bringIntoViewRequester = remember { BringIntoViewRequester()}
 
     Card(
-        modifier = Modifier.bringIntoViewRequester(bringIntoViewRequester)
+//        modifier = Modifier.bringIntoViewRequester(bringIntoViewRequester)
     ) {
         Row(
             modifier = Modifier
@@ -311,7 +311,7 @@ private fun DetailItem(
                             coroutineScope.launch {
                                 bringIntoViewRequester.bringIntoView()
                             }
-                    }
+                    }.bringIntoViewRequester(bringIntoViewRequester)
                 ,
                 value = when (reps) {
                     "0" -> ""
@@ -343,7 +343,7 @@ private fun DetailItem(
                             coroutineScope.launch {
                                 bringIntoViewRequester.bringIntoView()
                             }
-                    }
+                    }.bringIntoViewRequester(bringIntoViewRequester)
                 ,
                 value = when (weight) {
                     "0.0" -> ""
@@ -374,7 +374,7 @@ private fun DetailItem(
                             coroutineScope.launch {
                                 bringIntoViewRequester.bringIntoView()
                             }
-                    }
+                    }.bringIntoViewRequester(bringIntoViewRequester)
                 ,
                 value = when (ratio) {
                     "0" -> ""
