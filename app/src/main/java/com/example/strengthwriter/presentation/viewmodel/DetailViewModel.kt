@@ -103,14 +103,13 @@ class DetailViewModel @Inject constructor(
                 )
             ).toInt()
             _workoutList.forEach { workout ->
-                val workoutId: Int = workoutDao.addNewWorkout(
-                    workout.copy(missionId = missionId)
-                ).toInt()
-                setsDao.insertNewSetsList(
-                    workout.sets.map { sets ->
-                        sets.copy(workoutId = workoutId)
-                    }
-                )
+                Log.d("DetailViewModel::loadedWorkoutList", "workout :: $workout")
+                val _workout = workout.copy(missionId = missionId)
+                val workoutId: Int = workoutDao.addNewWorkout(_workout).toInt()
+                val _setsList = workout.sets.map { sets ->
+                    sets.copy(workoutId = workoutId)
+                }
+                setsDao.insertNewSetsList(_setsList)
             }
         }
 
