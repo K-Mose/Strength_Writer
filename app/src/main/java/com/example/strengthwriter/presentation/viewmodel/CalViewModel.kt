@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.strengthwriter.data.SetsDao
 import com.example.strengthwriter.data.WorkoutDao
+import com.example.strengthwriter.data.WriterDatabase
 import com.example.strengthwriter.data.model.Sets
 import com.example.strengthwriter.data.model.Workout
 import com.example.strengthwriter.utils.Exercise
@@ -22,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CalViewModel @Inject constructor(
+    private val database: WriterDatabase,
     private val setsDao: SetsDao,
     private val workoutDao: WorkoutDao
 ): ViewModel() {
@@ -160,11 +162,13 @@ class CalViewModel @Inject constructor(
 
     fun removeWorkout(workout: Workout) {
         // remove sets, remove workout
-        viewModelScope.launch(Dispatchers.IO) {
-            workout.sets.forEach { sets ->
-                setsDao.deleteSets(sets = sets)
+        database.runInTransaction {
+            viewModelScope.launch(Dispatchers.IO) {
+                workout.sets.forEach { sets ->
+                    setsDao.deleteSets(sets = sets)
+                }
+                workoutDao.deleteWorkout(workout = workout)
             }
-            workoutDao.deleteWorkout(workout = workout)
         }
     }
 }
