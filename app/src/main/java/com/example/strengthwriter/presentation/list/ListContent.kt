@@ -5,13 +5,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -31,16 +28,20 @@ import com.example.strengthwriter.R
 import com.example.strengthwriter.data.model.DailyMission
 import com.example.strengthwriter.data.model.Sets
 import com.example.strengthwriter.data.model.Workout
+import com.example.strengthwriter.presentation.components.DisplayAlertDialog
 import com.example.strengthwriter.presentation.components.SwipeScreen
 import com.example.strengthwriter.presentation.components.WorkoutItem
 import com.example.strengthwriter.ui.theme.*
 import com.example.strengthwriter.utils.Utils.removeDecimal
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ListContent(
-    missions: List<DailyMission>
+    missions: List<DailyMission>,
+    removeDailyMission: (DailyMission) -> Unit
 ) {
+    val openRemoveDialog = remember { mutableStateOf(false) }
+    val selectedMission = remember { mutableStateOf<DailyMission?>(null) }
     LazyColumn(
         modifier = Modifier.padding(all = PADDING_SMALL),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -52,8 +53,29 @@ fun ListContent(
                 it.id
             }
         ) { mission ->
-            ContentItem(mission)
+            Surface(
+                modifier = Modifier.combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        openRemoveDialog.value = true
+                        selectedMission.value = mission
+                    }
+                )
+            ) {
+                ContentItem(mission)
+            }
         }
+    }
+
+    DisplayAlertDialog(
+        title = "Delete Mission",
+        message = "",
+        openDialog = openRemoveDialog.value,
+        closeDialog = { openRemoveDialog.value= false }
+    ) {
+        removeDailyMission(selectedMission.value!!)
+        selectedMission.value = null
+        openRemoveDialog.value = false
     }
 }
 

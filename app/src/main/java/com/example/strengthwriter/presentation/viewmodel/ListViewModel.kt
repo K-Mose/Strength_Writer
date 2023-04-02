@@ -5,6 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.strengthwriter.data.DailyMissionDao
+import com.example.strengthwriter.data.SetsDao
+import com.example.strengthwriter.data.WorkoutDao
+import com.example.strengthwriter.data.WriterDatabase
 import com.example.strengthwriter.data.model.DailyMission
 import com.example.strengthwriter.utils.RequestState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +21,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListViewModel @Inject constructor(
-    val dailyMissionDao: DailyMissionDao
+    val database: WriterDatabase,
+    val dailyMissionDao: DailyMissionDao,
+    val workoutDao: WorkoutDao,
+    val setsDao: SetsDao
 ): ViewModel() {
 
     private var dailyMissionList = listOf<DailyMission>()
@@ -40,6 +46,20 @@ class ListViewModel @Inject constructor(
                 }
                 dailyMissionList = list
                 _dailyMissionState.value = RequestState.Success(dailyMissionList)
+            }
+        }
+    }
+
+    fun removeDailyMission(mission: DailyMission) {
+        database.runInTransaction {
+            viewModelScope.launch(Dispatchers.Main) {
+                mission.workout.forEach { workout ->
+                    workout.sets.forEach { sets ->
+                        setsDao.deleteSets(sets = sets)
+                    }
+                    workoutDao.deleteWorkout(workout = workout)
+                }
+                dailyMissionDao.deleteDailyMission(mission = mission)
             }
         }
     }

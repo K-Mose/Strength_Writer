@@ -32,7 +32,12 @@ fun ListScreen(
     HomeScaffold(
         screen = screen,
         content = {
-            ListContent(missions = missions)
+            ListContent(
+                missions = missions,
+                removeDailyMission = { mission ->
+                    listViewModel.removeDailyMission(mission)
+                }
+            )
         },
         fabClickListener = navigationToNewWorkout
     )

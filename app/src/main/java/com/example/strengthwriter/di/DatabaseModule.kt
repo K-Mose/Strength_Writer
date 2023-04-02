@@ -22,7 +22,7 @@ object DatabaseModule {
             context,
             WriterDatabase::class.java,
             STRENGTH_WRITER_DATABASE
-        ).build()
+        ).allowMainThreadQueries().build()
 
     @Provides
     @Singleton
