@@ -2,6 +2,7 @@ package com.example.strengthwriter.presentation.item
 
 import android.app.DatePickerDialog
 import android.icu.util.Calendar
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,6 +49,7 @@ fun DetailScreen(
     detailViewModel: DetailViewModel = hiltViewModel()
 ) {
     val workoutPopup = rememberSaveable { mutableStateOf(false) }
+    val loadPopup = rememberSaveable { mutableStateOf(false) }
     val title by detailViewModel.title
     val date by detailViewModel.date
     val workoutState by detailViewModel.workoutListState
@@ -56,6 +58,16 @@ fun DetailScreen(
         is RequestState.Loading -> (workoutState as RequestState.Loading<List<Workout>>).data
         else -> listOf()
     }
+
+    val loadedWorkoutState by detailViewModel.loadedWorkoutState.collectAsState()
+    val loadedWorkoutList = when(loadedWorkoutState) {
+        is RequestState.Success -> (loadedWorkoutState as RequestState.Success<List<Workout>>).data
+        is RequestState.Loading -> (loadedWorkoutState as RequestState.Loading<List<Workout>>).data
+        else -> listOf()
+    }
+
+    val openRemoveDialog = remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             MyAppBar(
@@ -90,7 +102,10 @@ fun DetailScreen(
                 title = title,
                 updateTitle = detailViewModel::updateTitle,
                 addExercise = { workoutPopup.value = true},
-                loadExercise = { }
+                loadExercise = {
+                    detailViewModel.loadAllWorkout()
+                    loadPopup.value = true
+                }
             )
             Surface(
                 modifier = Modifier
@@ -108,6 +123,17 @@ fun DetailScreen(
             WorkoutPopup(
                 navigateTo = { workoutPopup.value = false},
                 popupReturn = { workout -> detailViewModel.addWorkout(workout)}
+            )
+        }
+        if (loadPopup.value) {
+            Log.d("CALCULATOR::loadedWorkoutList", "$loadedWorkoutList")
+            LoadPopup(
+                workoutList = loadedWorkoutList,
+                itemClickListener = { workout ->
+                    detailViewModel.addWorkout(workout)
+                    loadPopup.value = false
+                },
+                closePopup = { loadPopup.value = false}
             )
         }
     }
@@ -187,6 +213,7 @@ fun Heading(
                             .size(36.dp)
                             .background(color = Color.White),
                         onClick = {
+                            Log.d("CALCULATOR::DetailsScreen", "LOAD EXERCISE")
                             loadExercise()
                         }
                     ) {
@@ -250,18 +277,35 @@ fun LoadPopup(
         ),
         onDismissRequest = { closePopup() }
     ) {
-        LazyColumn {
-            items(workoutList) { workout ->
-                Surface(
-                    onClick = {
-                        itemClickListener(workout)
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.White)
+                .padding(all = PADDING_MEDIUM)
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(workoutList) { workout ->
+                    Surface(
+                        onClick = {
+                            itemClickListener(workout)
+                        }
+                    ) {
+                        WorkoutItem(workout = workout)
                     }
-                ) {
-                    WorkoutItem(workout = workout)
                 }
             }
         }
     }
+}
+
+@Composable
+fun RemoveDialog(
+    openRemoveDialog: Boolean,
+
+) {
+
 }
 
 @Preview
@@ -276,3 +320,4 @@ fun HeadingPreview() {
         loadExercise = {}
     )
 }
+

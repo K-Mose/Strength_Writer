@@ -13,6 +13,9 @@ import com.example.strengthwriter.data.model.Workout
 import com.example.strengthwriter.utils.RequestState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -57,7 +60,38 @@ class DetailViewModel @Inject constructor(
         }
     }
 
+    private var loadedWorkoutList = listOf<Workout>()
+    private val _loadedWorkoutState = MutableStateFlow<RequestState<List<Workout>>>(RequestState.Idle)
+    val loadedWorkoutState: StateFlow<RequestState<List<Workout>>> = _loadedWorkoutState
+
+    fun loadAllWorkout() {
+        Log.d("DetailViewModel::loadedWorkoutList", "start")
+        _loadedWorkoutState.value = RequestState.Loading(loadedWorkoutList)
+        viewModelScope.launch(Dispatchers.IO) {
+            workoutDao.getAllWorkout().collect { maps ->
+                maps.keys.forEach { workout ->
+                    maps[workout]?.let {
+                        workout.sets.addAll(
+                            it.map { sets ->
+                                sets.copy(id = 0)
+                            }
+                        )
+                    }
+                }
+                loadedWorkoutList = maps.keys.toList()
+                    .map {
+                        it.copy(id = 0)
+                    }
+                Log.d("DetailViewModel::loadedWorkoutList", "list : $loadedWorkoutList")
+                _loadedWorkoutState.value = RequestState.Success(loadedWorkoutList)
+                Log.d("DetailViewModel::loadedWorkoutList", "list : $loadedWorkoutState")
+            }
+        }
+        Log.d("DetailViewModel::loadedWorkoutList", "end")
+    }
+
     fun addMission() {
+        Log.d("DetailViewModel::loadedWorkoutList", "save")
         viewModelScope.launch {
             val missionId: Int = dailyMissionDao.insertNewDailyMission(
                 DailyMission(
