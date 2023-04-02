@@ -52,11 +52,13 @@ class DetailViewModel @Inject constructor(
     }
 
     fun removeWorkout(index: Int) {
-        _workoutListState.value = RequestState.Loading(_workoutList)
-        _workoutList.removeAt(index)
-        viewModelScope.launch(Dispatchers.IO) {
-            Thread.sleep(50)
-            _workoutListState.value = RequestState.Success(_workoutList)
+        if (index != -1) {
+            _workoutListState.value = RequestState.Loading(_workoutList)
+            _workoutList.removeAt(index)
+            viewModelScope.launch(Dispatchers.IO) {
+                Thread.sleep(50)
+                _workoutListState.value = RequestState.Success(_workoutList)
+            }
         }
     }
 

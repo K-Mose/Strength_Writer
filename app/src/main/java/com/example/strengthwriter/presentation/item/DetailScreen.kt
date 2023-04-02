@@ -3,7 +3,9 @@ package com.example.strengthwriter.presentation.item
 import android.app.DatePickerDialog
 import android.icu.util.Calendar
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,10 +33,7 @@ import com.example.strengthwriter.R
 import com.example.strengthwriter.data.model.Workout
 import com.example.strengthwriter.navigation.Screens
 import com.example.strengthwriter.presentation.calculator.CalDetail
-import com.example.strengthwriter.presentation.components.ActionItem
-import com.example.strengthwriter.presentation.components.MyAppBar
-import com.example.strengthwriter.presentation.components.WorkoutCard
-import com.example.strengthwriter.presentation.components.WorkoutItem
+import com.example.strengthwriter.presentation.components.*
 import com.example.strengthwriter.presentation.viewmodel.DetailViewModel
 import com.example.strengthwriter.ui.theme.PADDING_MEDIUM
 import com.example.strengthwriter.ui.theme.PADDING_SMALL
@@ -43,6 +42,7 @@ import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Utils.toFormattedString
 import java.util.*
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailScreen(
     screen: Screens,
@@ -67,6 +67,7 @@ fun DetailScreen(
     }
 
     val openRemoveDialog = remember { mutableStateOf(false) }
+    val selectedWorkoutIndex = remember { mutableStateOf(-1) }
 
     Scaffold(
         topBar = {
@@ -114,7 +115,17 @@ fun DetailScreen(
             ) {
                 LazyColumn {
                     itemsIndexed(workoutList) { index, workout ->
-                        WorkoutCard(workout = workout)
+                        Surface(
+                            modifier = Modifier.combinedClickable(
+                                onClick = {},
+                                onLongClick = {
+                                    selectedWorkoutIndex.value = index
+                                    openRemoveDialog.value = true
+                                }
+                            )
+                        ) {
+                            WorkoutCard(workout = workout)
+                        }
                     }
                 }
             }
@@ -136,6 +147,20 @@ fun DetailScreen(
                 closePopup = { loadPopup.value = false}
             )
         }
+    }
+
+    DisplayAlertDialog(
+        title = "Delete Workout",
+        message = "Are you sure remove this workout?",
+        openDialog = openRemoveDialog.value,
+        closeDialog = {
+            selectedWorkoutIndex.value = -1
+            openRemoveDialog.value = false
+        }
+    ) {
+        detailViewModel.removeWorkout(selectedWorkoutIndex.value)
+        selectedWorkoutIndex.value = -1
+        openRemoveDialog.value = false
     }
 }
 
@@ -298,14 +323,6 @@ fun LoadPopup(
             }
         }
     }
-}
-
-@Composable
-fun RemoveDialog(
-    openRemoveDialog: Boolean,
-
-) {
-
 }
 
 @Preview
