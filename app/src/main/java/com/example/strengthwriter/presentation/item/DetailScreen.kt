@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,7 +21,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,7 +72,11 @@ fun DetailScreen(
     val openRemoveDialog = remember { mutableStateOf(false) }
     val selectedWorkoutIndex = remember { mutableStateOf(-1) }
 
+    val focusManager = LocalFocusManager.current
     Scaffold(
+        modifier = Modifier.pointerInput(Unit) {
+            detectTapGestures { focusManager.clearFocus() }
+        },
         topBar = {
             MyAppBar(
                 title = stringResource(R.string.daily_mission),
