@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.strengthwriter.data.DailyMissionDao
 import com.example.strengthwriter.data.SetsDao
 import com.example.strengthwriter.data.WorkoutDao
+import com.example.strengthwriter.data.WriterDatabase
 import com.example.strengthwriter.data.model.DailyMission
 import com.example.strengthwriter.data.model.Workout
 import com.example.strengthwriter.utils.RequestState
@@ -21,9 +22,10 @@ import javax.inject.Inject
 
 @HiltViewModel // @Inject annotation이 필요함
 class DetailViewModel @Inject constructor(
-    val setsDao: SetsDao,
-    val workoutDao: WorkoutDao,
-    val dailyMissionDao: DailyMissionDao
+    private val database: WriterDatabase,
+    private val setsDao: SetsDao,
+    private val workoutDao: WorkoutDao,
+    private val dailyMissionDao: DailyMissionDao
 ) : ViewModel(){
 
     val title: MutableState<String> = mutableStateOf("")
@@ -94,24 +96,33 @@ class DetailViewModel @Inject constructor(
 
     fun addMission() {
         Log.d("DetailViewModel::loadedWorkoutList", "save")
-        viewModelScope.launch {
-            val missionId: Int = dailyMissionDao.insertNewDailyMission(
-                DailyMission(
-                    id = 0,
-                    date = date.value,
-                    title = title.value
-                )
-            ).toInt()
-            _workoutList.forEach { workout ->
-                Log.d("DetailViewModel::loadedWorkoutList", "workout :: $workout")
-                val _workout = workout.copy(missionId = missionId)
-                val workoutId: Int = workoutDao.addNewWorkout(_workout).toInt()
-                val _setsList = workout.sets.map { sets ->
-                    sets.copy(workoutId = workoutId)
+        database.runInTransaction {
+            viewModelScope.launch(Dispatchers.IO) {
+                val missionId: Int = dailyMissionDao.insertNewDailyMission(
+                    DailyMission(
+                        id = 0,
+                        date = date.value,
+                        title = title.value
+                    )
+                ).toInt()
+                _workoutList.forEach { workout ->
+                    Log.d("DetailViewModel::loadedWorkoutList", "workout :: $workout")
+                    val _workout = workout.copy(missionId = missionId)
+                    val workoutId: Int = workoutDao.addNewWorkout(_workout).toInt()
+                    val _setsList = workout.sets.map { sets ->
+                        sets.copy(workoutId = workoutId)
+                    }
+                    setsDao.insertNewSetsList(_setsList)
                 }
-                setsDao.insertNewSetsList(_setsList)
             }
         }
+    }
 
+    fun validateInputData(): Boolean {
+        if (title.value.isEmpty())
+            return false
+        if (_workoutList.isEmpty())
+            return false
+        return true
     }
 }
