@@ -2,6 +2,7 @@ package com.example.strengthwriter.presentation.components
 
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 
@@ -31,7 +32,7 @@ fun DisplayAlertDialog(
                 
             },
             dismissButton = {
-                Button(onClick = {
+                OutlinedButton(onClick = {
                     closeDialog()
                 }) {
                     Text(text = "Cancel")

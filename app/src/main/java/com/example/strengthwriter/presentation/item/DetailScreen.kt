@@ -1,10 +1,13 @@
 package com.example.strengthwriter.presentation.item
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.icu.util.Calendar
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -13,9 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -38,9 +39,7 @@ import com.example.strengthwriter.navigation.Screens
 import com.example.strengthwriter.presentation.calculator.CalDetail
 import com.example.strengthwriter.presentation.components.*
 import com.example.strengthwriter.presentation.viewmodel.DetailViewModel
-import com.example.strengthwriter.ui.theme.PADDING_MEDIUM
-import com.example.strengthwriter.ui.theme.PADDING_SMALL
-import com.example.strengthwriter.ui.theme.SPACER_LARGE_WIDTH
+import com.example.strengthwriter.ui.theme.*
 import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Utils.toFormattedString
 import java.util.*
@@ -72,6 +71,8 @@ fun DetailScreen(
     val openRemoveDialog = remember { mutableStateOf(false) }
     val selectedWorkoutIndex = remember { mutableStateOf(-1) }
 
+    val context: Context = LocalContext.current
+
     val focusManager = LocalFocusManager.current
     Scaffold(
         modifier = Modifier.pointerInput(Unit) {
@@ -89,8 +90,12 @@ fun DetailScreen(
                 actionIcon = ActionItem(
                     icon = Icons.Filled.Check,
                     onClick = {
-                        detailViewModel.addMission()
-                        screen.list()
+                        if (detailViewModel.validateInputData()) {
+                            detailViewModel.addMission()
+                            screen.list()
+                        }  else {
+                            displayToast(context)
+                        }
                     }
                 )
             )
@@ -286,11 +291,19 @@ fun WorkoutPopup(
         ),
         onDismissRequest = { navigateTo()}
     ) {
-        CalDetail(
-            navigateTo = navigateTo,
-            popupReturn = popupReturn,
-            isPopup = true
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.White)
+                .padding(all = PADDING_MEDIUM)
+        ) {
+            CloseBox { navigateTo()}
+            CalDetail(
+                navigateTo = navigateTo,
+                popupReturn = popupReturn,
+                isPopup = true
+            )
+        }
     }
 }
 
@@ -318,18 +331,55 @@ fun LoadPopup(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
+                item {
+                    CloseBox { closePopup()}
+                }
                 items(workoutList) { workout ->
                     Surface(
                         onClick = {
                             itemClickListener(workout)
                         }
                     ) {
-                        WorkoutItem(workout = workout)
+                        WorkoutCard(workout = workout)
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun CloseBox(
+    closePopup: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(BOX_SMALL_HEIGHT)
+    )
+    {
+        Surface(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .size(ICONS_SIZE_LARGE)
+                .clickable {
+                    closePopup()
+                }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(id = R.string.close_icon)
+            )
+        }
+    }
+}
+
+fun displayToast(context: Context) {
+    Toast.makeText(
+        context,
+        "Some Field is Empty",
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 @Preview

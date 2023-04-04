@@ -10,4 +10,6 @@
     <string name="topbar_action">TopBar Action</string>
     <string name="daily_mission">Daily Mission</string>
     <string name="delete_icon">Delete Icon</string>
+    <string name="calculator_icon">Calculator Icon</string>
+    <string name="close_icon">Close Icon</string>
 </resources>

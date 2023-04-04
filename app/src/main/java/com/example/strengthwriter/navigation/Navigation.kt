@@ -1,7 +1,11 @@
 package com.example.strengthwriter.navigation
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,6 +17,7 @@ import com.example.strengthwriter.presentation.calculator.Calculator
 import com.example.strengthwriter.presentation.item.DetailScreen
 import com.example.strengthwriter.presentation.list.ListScreen
 import com.example.strengthwriter.presentation.viewmodel.DetailViewModel
+import com.example.strengthwriter.ui.theme.SPACER_LARGE_HEIGHT
 import com.example.strengthwriter.utils.Constants.CALCULATOR_SCREEN
 import com.example.strengthwriter.utils.Constants.CAL_DETAIL_SCREEN
 import com.example.strengthwriter.utils.Constants.LIST_SCREEN
@@ -62,7 +67,6 @@ fun Navigation(
             })
         ) { backstackEntry ->
             val id = backstackEntry.arguments?.getInt("id")
-
             CalDetail(
                 navigateTo = screen.calculator
             )

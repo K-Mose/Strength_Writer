@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,11 +37,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.strengthwriter.R
 import com.example.strengthwriter.data.model.Workout
 import com.example.strengthwriter.presentation.components.ExerciseDropDown
+import com.example.strengthwriter.presentation.item.CloseBox
 import com.example.strengthwriter.presentation.viewmodel.CalViewModel
 import com.example.strengthwriter.presentation.viewmodel._Sets
-import com.example.strengthwriter.ui.theme.PADDING_EXTRA_LARGE
-import com.example.strengthwriter.ui.theme.PADDING_SMALL
-import com.example.strengthwriter.ui.theme.SPACER_SMALL_WIDTH
+import com.example.strengthwriter.ui.theme.*
 import com.example.strengthwriter.utils.Exercise
 import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Unit.LBS
@@ -99,6 +99,7 @@ fun CalDetail(
 
     Calculator(
         workoutMemo = memo,
+        navigateTo = navigateTo,
         setWorkoutMemo = {
             calViewModel.setWorkoutMemo(it)
         },
@@ -136,6 +137,7 @@ fun CalDetail(
 @Composable
 fun Calculator(
     workoutMemo: String,
+    navigateTo: () -> Unit,
     setWorkoutMemo: (String) -> Unit,
     exercise: Exercise,
     onExerciseSelected: (Exercise) -> Unit,
@@ -153,13 +155,17 @@ fun Calculator(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(all = PADDING_EXTRA_LARGE)
+            .padding(
+                horizontal = PADDING_EXTRA_LARGE,
+                vertical = PADDING_SMALL
+            )
             .pointerInput(Unit) {
                 detectTapGestures {
                     focusManager.clearFocus()
                 }
             }
     ) {
+        CloseBox { navigateTo()}
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -215,6 +221,23 @@ fun Calculator(
                     onClick = { addItem() }
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add_sets))
+                }
+            }
+        }
+        if (setsList.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ICONS_SIZE_LARGE),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = {
+                    // Dialog?
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_calculate_24),
+                        contentDescription = stringResource(R.string.calculator_icon)
+                    )
                 }
             }
         }
@@ -311,7 +334,8 @@ private fun DetailItem(
                             coroutineScope.launch {
                                 bringIntoViewRequester.bringIntoView()
                             }
-                    }.bringIntoViewRequester(bringIntoViewRequester)
+                    }
+                    .bringIntoViewRequester(bringIntoViewRequester)
                 ,
                 value = when (reps) {
                     "0" -> ""
@@ -343,7 +367,8 @@ private fun DetailItem(
                             coroutineScope.launch {
                                 bringIntoViewRequester.bringIntoView()
                             }
-                    }.bringIntoViewRequester(bringIntoViewRequester)
+                    }
+                    .bringIntoViewRequester(bringIntoViewRequester)
                 ,
                 value = when (weight) {
                     "0.0" -> ""
@@ -367,14 +392,15 @@ private fun DetailItem(
                     .width(100.dp)
                     .focusRequester(ratioFocus)
                     .focusProperties {
-                        next = focusList[if(!isLast) index + 1 else index]
+                        next = focusList[if (!isLast) index + 1 else index]
                     }
                     .onFocusEvent { focusState ->
                         if (focusState.isFocused)
                             coroutineScope.launch {
                                 bringIntoViewRequester.bringIntoView()
                             }
-                    }.bringIntoViewRequester(bringIntoViewRequester)
+                    }
+                    .bringIntoViewRequester(bringIntoViewRequester)
                 ,
                 value = when (ratio) {
                     "0" -> ""
@@ -401,7 +427,7 @@ private fun DetailItem(
             Spacer(modifier = Modifier.width(SPACER_SMALL_WIDTH))
             Surface(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(ICONS_SIZE_MEDIUM)
                     .clickable { removeItem(index) }
             ) {
                 Icon(
