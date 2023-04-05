@@ -9,9 +9,10 @@ import androidx.compose.runtime.Composable
 @Composable
 fun DisplayAlertDialog(
     title: String,
-    message: String,
+    body: @Composable () -> Unit,
     openDialog: Boolean,
     closeDialog: () -> Unit,
+    confirmText: String = "Delete",
     confirmDialog: () -> Unit
 ) {
     if (openDialog) {
@@ -20,14 +21,14 @@ fun DisplayAlertDialog(
                     Text(text = title)
             },
             text = {
-                   Text(text = message)
+                   body()
             },
             confirmButton = {
                 Button(onClick = {
                     confirmDialog()
                     closeDialog()    
                 }) {
-                    Text(text = "Delete")
+                    Text(text = confirmText)
                 }
                 
             },

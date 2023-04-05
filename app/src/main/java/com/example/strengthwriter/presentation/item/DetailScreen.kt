@@ -163,7 +163,7 @@ fun DetailScreen(
 
     DisplayAlertDialog(
         title = "Delete Workout",
-        message = "Are you sure remove this workout?",
+        body = { Text("Are you sure remove this workout?")},
         openDialog = openRemoveDialog.value,
         closeDialog = {
             selectedWorkoutIndex.value = -1
