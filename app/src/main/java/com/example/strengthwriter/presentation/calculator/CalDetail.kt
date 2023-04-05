@@ -1,10 +1,7 @@
 package com.example.strengthwriter.presentation.calculator
 
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.strengthwriter.R
 import com.example.strengthwriter.data.model.Workout
+import com.example.strengthwriter.presentation.components.DisplayAlertDialog
 import com.example.strengthwriter.presentation.components.ExerciseDropDown
 import com.example.strengthwriter.presentation.item.CloseBox
 import com.example.strengthwriter.presentation.viewmodel.CalViewModel
@@ -44,7 +42,6 @@ import com.example.strengthwriter.ui.theme.*
 import com.example.strengthwriter.utils.Exercise
 import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Unit.LBS
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Preview
@@ -96,6 +93,8 @@ fun CalDetail(
     }
 
     val focusList = calViewModel.focusList
+    
+    val openDialog = remember { mutableStateOf(false) }
 
     Calculator(
         workoutMemo = memo,
@@ -130,7 +129,11 @@ fun CalDetail(
             calViewModel.removeFocusListItem()
             calViewModel.removeSets(index)
         },
-        focusList = focusList
+        focusList = focusList,
+        openDialog = { openDialog.value = true},
+        openDialogValue = openDialog.value,
+        calculateDialog = { oneRm -> calViewModel.calculateSets(oneRm = oneRm)},
+        closeDialog = { openDialog.value = false}
     )
 }
 
@@ -148,7 +151,11 @@ fun Calculator(
     addItem: () -> Unit,
     removeItem: (Int) -> Unit,
     addExercise: () -> Unit,
-    focusList: List<FocusRequester>
+    focusList: List<FocusRequester>,
+    openDialog: () -> Unit,
+    openDialogValue: Boolean,
+    calculateDialog: (Int) -> Unit,
+    closeDialog: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -232,7 +239,7 @@ fun Calculator(
                 horizontalArrangement = Arrangement.End
             ) {
                 IconButton(onClick = {
-                    // Dialog?
+                    openDialog()
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_calculate_24),
@@ -254,6 +261,32 @@ fun Calculator(
                 focusList = focusList
             )
         }
+        val oneRm = remember { mutableStateOf("0")}
+        DisplayAlertDialog(
+            title = "Calculate LBS",
+            body = {
+                   Row(
+                       modifier = Modifier.fillMaxWidth()
+                   ) {
+                       OutlinedTextField(
+                           value = oneRm.value,
+                           onValueChange = { oneRm.value = it},
+                           label = {
+                               Text(text = "1RM")
+                           },
+                           keyboardOptions = KeyboardOptions.Default.copy(
+                               keyboardType = KeyboardType.Number
+                           )
+                       )
+                   }
+            },
+            openDialog = openDialogValue,
+            closeDialog = { closeDialog()},
+            confirmText = "Calc",
+            confirmDialog = {
+                calculateDialog(oneRm.value.toIntOrNull() ?: 1)
+            }
+        )
     }
 }
 

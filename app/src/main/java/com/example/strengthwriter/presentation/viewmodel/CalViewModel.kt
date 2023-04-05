@@ -131,6 +131,24 @@ class CalViewModel @Inject constructor(
         }
     }
 
+    fun calculateSets(oneRm: Int) {
+        _setsState.value = RequestState.Loading(_setsList)
+        viewModelScope.launch(Dispatchers.IO) {
+            _setsState.value = RequestState.Success(
+                _setsList.let{ list ->
+                    list.mapIndexed { index, sets ->
+                        if (sets.ratio.isNotEmpty())
+                            list[index] = sets.copy(weight = (sets.ratio.toInt() * oneRm / 100).toString())
+                        else
+                            list[index] = sets
+                        list[index]
+                    }.toMutableList()
+                }
+            )
+        }
+        Log.d("${this::class.simpleName}::", "CALCULATE SETS : ${_setsList}")
+    }
+
     fun saveExercise() {
         viewModelScope.launch {
             val workoutId = workoutDao.addNewWorkout(
