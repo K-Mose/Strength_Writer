@@ -36,6 +36,9 @@ fun ListScreen(
                 missions = missions,
                 removeDailyMission = { mission ->
                     listViewModel.removeDailyMission(mission)
+                },
+                navigateTo = { id ->
+                    screen.detail(id)
                 }
             )
         },

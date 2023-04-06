@@ -30,6 +30,7 @@ class DetailViewModel @Inject constructor(
 
     val title: MutableState<String> = mutableStateOf("")
     val date: MutableState<String> = mutableStateOf("")
+    val missonId: MutableState<Int> = mutableStateOf(0)
 
     fun updateTitle(newTitle: String) {
         title.value = newTitle
@@ -92,6 +93,25 @@ class DetailViewModel @Inject constructor(
             }
         }
         Log.d("DetailViewModel::loadedWorkoutList", "end")
+    }
+
+    fun loadMission(id: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dailyMissionDao.getMission(id = id).collect {  mw ->
+                mw.mission.also { mission ->
+                    title.value = mission.title
+                    date.value = mission.date
+                    missonId.value = mission.id
+                }
+                // ViewModel 공유하므로 초기화 시켜줌
+                _workoutList.clear()
+                mw.workouts.onEach { ws ->
+                    ws.workout.sets.addAll(ws.sets)
+                    _workoutList.add(ws.workout)
+                }
+                _workoutListState.value = RequestState.Success(_workoutList)
+            }
+        }
     }
 
     fun addMission() {

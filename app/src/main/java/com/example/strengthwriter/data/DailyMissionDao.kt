@@ -20,7 +20,7 @@ interface DailyMissionDao {
 
 
     @Query("SELECT * FROM $MISSION_TABLE WHERE id = :id")
-    fun getMissions(id: Int): Flow<DailyMission>
+    fun getMission(id: Int): Flow<MissionAndWorkout>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertNewDailyMission(mission: DailyMission): Long

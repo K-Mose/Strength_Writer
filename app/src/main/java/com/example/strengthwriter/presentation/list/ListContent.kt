@@ -22,7 +22,8 @@ import com.example.strengthwriter.ui.theme.*
 @Composable
 fun ListContent(
     missions: List<DailyMission>,
-    removeDailyMission: (DailyMission) -> Unit
+    removeDailyMission: (DailyMission) -> Unit,
+    navigateTo: (Int) -> Unit
 ) {
     val openRemoveDialog = remember { mutableStateOf(false) }
     val selectedMission = remember { mutableStateOf<DailyMission?>(null) }
@@ -39,7 +40,9 @@ fun ListContent(
         ) { mission ->
             Surface(
                 modifier = Modifier.combinedClickable(
-                    onClick = {},
+                    onClick = {
+                        navigateTo(mission.id)
+                    },
                     onLongClick = {
                         openRemoveDialog.value = true
                         selectedMission.value = mission

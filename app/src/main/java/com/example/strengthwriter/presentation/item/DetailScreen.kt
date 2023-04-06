@@ -54,6 +54,7 @@ fun DetailScreen(
     val loadPopup = rememberSaveable { mutableStateOf(false) }
     val title by detailViewModel.title
     val date by detailViewModel.date
+    val missionId by detailViewModel.missonId
     val workoutState by detailViewModel.workoutListState
     val workoutList = when(workoutState) {
         is RequestState.Success -> (workoutState as RequestState.Success<List<Workout>>).data
@@ -91,7 +92,11 @@ fun DetailScreen(
                     icon = Icons.Filled.Check,
                     onClick = {
                         if (detailViewModel.validateInputData()) {
-                            detailViewModel.addMission()
+                            if (missionId > 0) {
+                                detailViewModel
+                            }
+                            else
+                                detailViewModel.addMission()
                             screen.list()
                         }  else {
                             displayToast(context)
