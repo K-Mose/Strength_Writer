@@ -42,6 +42,7 @@ import com.example.strengthwriter.ui.theme.*
 import com.example.strengthwriter.utils.Exercise
 import com.example.strengthwriter.utils.RequestState
 import com.example.strengthwriter.utils.Unit.LBS
+import com.example.strengthwriter.utils.Utils.parseNumberString
 import kotlinx.coroutines.launch
 
 @Preview
@@ -261,13 +262,11 @@ fun Calculator(
                 focusList = focusList
             )
         }
-        val oneRm = remember { mutableStateOf("0")}
+        val oneRm = remember { mutableStateOf("")}
         DisplayAlertDialog(
             title = "Calculate LBS",
             body = {
-                   Row(
-                       modifier = Modifier.fillMaxWidth()
-                   ) {
+                   Row {
                        OutlinedTextField(
                            value = oneRm.value,
                            onValueChange = { oneRm.value = it},

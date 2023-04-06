@@ -297,7 +297,6 @@ fun WorkoutPopup(
                 .background(color = Color.White)
                 .padding(all = PADDING_MEDIUM)
         ) {
-            CloseBox { navigateTo()}
             CalDetail(
                 navigateTo = navigateTo,
                 popupReturn = popupReturn,
