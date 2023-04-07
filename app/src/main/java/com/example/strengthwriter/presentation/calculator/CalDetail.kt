@@ -4,8 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -79,7 +77,7 @@ fun CalDetail(
     navigateTo: () -> Unit,
     isPopup: Boolean = false,
     popupReturn: (Workout) -> Unit = {},
-    unit: Units = Units.LBS,
+    unit: Units = LBS,
     calViewModel: CalViewModel = hiltViewModel()
 ) {
     val setsState: RequestState<List<_Sets>> by calViewModel.setsState.collectAsState()
@@ -230,7 +228,6 @@ fun Calculator(
         Row (
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val text = remember { mutableStateOf("") }
             Box(modifier = Modifier.weight(4f)) {
                 ExerciseDropDown(
                     exercise = exercise,
@@ -297,8 +294,10 @@ private fun DetailList(
     focusList: List<FocusRequester>
 ) {
     Log.d("CALCULATOR::DetailList", "$setsList")
-    LazyColumn {
-        itemsIndexed(setsList) {index, sets ->
+    // LazyColumn으로 하면 보이지 않는 리스트는 생성되지 않아서 포커싱 할 수 없음
+    Column {
+        repeat(setsList.size) {index ->
+            val sets = setsList[index]
             DetailItem(
                 index = index,
                 sets = sets,
