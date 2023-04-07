@@ -16,9 +16,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.strengthwriter.utils.Units
+import com.example.strengthwriter.utils.Utils.convertKg
+import com.example.strengthwriter.utils.Utils.convertLbs
 
 @HiltViewModel // @Inject annotation이 필요함
 class DetailViewModel @Inject constructor(
@@ -30,8 +32,8 @@ class DetailViewModel @Inject constructor(
 
     val title: MutableState<String> = mutableStateOf("")
     val date: MutableState<String> = mutableStateOf("")
-    val missonId: MutableState<Int> = mutableStateOf(0)
-
+    val missionId: MutableState<Int> = mutableStateOf(0)
+    val unit: MutableState<Units> = mutableStateOf(Units.LBS)
     fun updateTitle(newTitle: String) {
         title.value = newTitle
     }
@@ -44,6 +46,41 @@ class DetailViewModel @Inject constructor(
 
     private val _workoutListState = mutableStateOf<RequestState<List<Workout>>>(RequestState.Idle)
     val workoutListState = _workoutListState
+
+    private val _mission: MutableState<DailyMission?> = mutableStateOf(null)
+
+
+
+    fun initAll() {
+        title.value = ""
+        date.value = ""
+        missionId.value = 0
+        _workoutList.clear()
+        _workoutListState.value = RequestState.Idle
+        _mission.value = null
+    }
+
+    fun convertUnit() {
+        _workoutListState.value = RequestState.Loading(_workoutList)
+        viewModelScope.launch(Dispatchers.IO) {
+            unit.value = if (unit.value == Units.LBS) Units.KG else Units.LBS
+            _workoutList.replaceAll{ workout ->
+                workout.sets.forEachIndexed { index, sets ->
+                    if (sets.units != unit.value)
+                        when(sets.units) {
+                            Units.LBS -> {
+                                workout.sets[index] = sets.copy(units = Units.KG, weight = sets.weight.convertKg())
+                            }
+                            Units.KG -> {
+                                workout.sets[index] = sets.copy(units = Units.LBS, weight = sets.weight.convertLbs())
+                            }
+                        }
+                }
+                workout
+            }
+            _workoutListState.value = RequestState.Success(_workoutList)
+        }
+    }
 
     fun addWorkout(workout: Workout) {
         _workoutListState.value = RequestState.Loading(_workoutList)
@@ -101,14 +138,22 @@ class DetailViewModel @Inject constructor(
                 mw.mission.also { mission ->
                     title.value = mission.title
                     date.value = mission.date
-                    missonId.value = mission.id
+                    missionId.value = mission.id
                 }
                 // ViewModel 공유하므로 초기화 시켜줌
                 _workoutList.clear()
                 mw.workouts.onEach { ws ->
+                    unit.value = ws.sets[0].units ?: Units.LBS
                     ws.workout.sets.addAll(ws.sets)
                     _workoutList.add(ws.workout)
                 }
+                _mission.value = mw.mission.copy(
+                    id = missionId.value,
+                    title = title.value,
+                    date = date.value,
+                    workout = _workoutList
+                )
+
                 _workoutListState.value = RequestState.Success(_workoutList)
             }
         }
@@ -127,12 +172,53 @@ class DetailViewModel @Inject constructor(
                 ).toInt()
                 _workoutList.forEach { workout ->
                     Log.d("DetailViewModel::loadedWorkoutList", "workout :: $workout")
-                    val _workout = workout.copy(missionId = missionId)
+                    val _workout = workout.copy(id = 0, missionId = missionId)
                     val workoutId: Int = workoutDao.addNewWorkout(_workout).toInt()
                     val _setsList = workout.sets.map { sets ->
-                        sets.copy(workoutId = workoutId)
+                        sets.copy(id = 0, workoutId = workoutId)
                     }
                     setsDao.insertNewSetsList(_setsList)
+                }
+            }
+        }
+    }
+
+    fun updateMission() {
+        /*
+        새로운 데이터는 추가하고
+        지울 데이터는 지움
+         */
+        database.runInTransaction {
+            viewModelScope.launch(Dispatchers.IO) {
+                dailyMissionDao.updateDailyMission(
+                    mission = DailyMission(
+                        id = missionId.value,
+                        title = title.value,
+                        date = date.value
+                    )
+                )
+                _workoutList.forEach { workout ->
+                    workoutDao.updateWorkout(workout = workout)
+                    workout.sets.forEach { sets ->
+                        setsDao.updateSets(sets = sets)
+                    }
+                }
+
+            }
+        }
+    }
+
+    fun removeDailyMission() {
+        _mission.value?.let { mission ->
+            database.runInTransaction {
+                viewModelScope.launch(Dispatchers.Main) {
+                    mission.workout.forEach { workout ->
+                        workout.sets.forEach { sets ->
+                            setsDao.deleteSets(sets = sets)
+                        }
+                        workoutDao.deleteWorkout(workout = workout)
+                    }
+                    dailyMissionDao.deleteDailyMission(mission = mission)
                 }
             }
         }
