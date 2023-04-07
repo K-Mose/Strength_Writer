@@ -1,24 +1,24 @@
 package com.example.strengthwriter.utils
 
-enum class Unit {
+enum class Units {
     LBS,
     KG
 }
 
-fun String?.toUnit(): Unit {
+fun String?.toUnit(): Units {
     return when {
         this!!.lowercase() == "lbs" -> {
-            Unit.LBS
+            Units.LBS
         }
         this!!.lowercase() == "lb" -> {
-            Unit.LBS
+            Units.LBS
         }
         this!!.lowercase() == "found" -> {
-            Unit.LBS
+            Units.LBS
         }
         this!!.lowercase() == "kg" -> {
-            Unit.KG
+            Units.KG
         }
-        else -> Unit.KG
+        else -> Units.KG
     }
 }

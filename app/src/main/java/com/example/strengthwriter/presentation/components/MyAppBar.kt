@@ -2,8 +2,6 @@ package com.example.strengthwriter.presentation.components
 
 import androidx.compose.material.*
 import com.example.strengthwriter.R
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -15,7 +13,8 @@ fun MyAppBar(
    isNavigation: Boolean = false,
    navigationIcon: ActionItem? = null,
    isActionButton: Boolean = false,
-   actionIcon: ActionItem? = null
+   actionIcon: ActionItem? = null,
+   iconBody: @Composable () -> Unit = {}
 ) {
    TopAppBar(
       backgroundColor = AppBarColor,
@@ -25,7 +24,7 @@ fun MyAppBar(
          if (isNavigation) {
             IconButton(onClick = { navigationIcon!!.onClick() }) {
                Icon(
-                  imageVector = navigationIcon!!.icon,
+                  imageVector = navigationIcon!!.icon!!,
                   contentDescription = stringResource(R.string.menu_icon)
                )
             }
@@ -39,6 +38,7 @@ fun MyAppBar(
                   contentDescription = stringResource(R.string.topbar_action),
                   tint = Color.White
                )
+               iconBody()
             }
          }
       }

@@ -50,7 +50,9 @@ fun Navigation(
         ) { backstackEntry ->
             val id = backstackEntry.arguments!!.getInt("id")
             LaunchedEffect(key1 = id) {
-                detailViewModel.loadMission(id)
+                detailViewModel.initAll()
+                if (id > 0)
+                    detailViewModel.loadMission(id)
             }
             DetailScreen(
                 screen = screen,

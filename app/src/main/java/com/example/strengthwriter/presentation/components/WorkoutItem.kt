@@ -90,7 +90,7 @@ private fun SetsItem(
                 text = "${idx}. "
             )
             Text(
-                text = "${sets.repetition} rep / ${sets.weight.removeDecimal()} ${sets.unit.name.lowercase()}",
+                text = "${sets.repetition} rep / ${sets.weight.removeDecimal()} ${sets.units.name.lowercase()}",
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

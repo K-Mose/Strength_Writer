@@ -12,7 +12,7 @@ import com.example.strengthwriter.data.model.Sets
 import com.example.strengthwriter.data.model.Workout
 import com.example.strengthwriter.utils.Exercise
 import com.example.strengthwriter.utils.RequestState
-import com.example.strengthwriter.utils.Unit
+import com.example.strengthwriter.utils.Units
 import com.example.strengthwriter.utils.Utils.parseDoubleString
 import com.example.strengthwriter.utils.Utils.parseNumberString
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -77,6 +77,8 @@ class CalViewModel @Inject constructor(
 
     fun initList() {
         _setsState.value = RequestState.Idle
+        focusList.clear()
+        _setsList.clear()
         exercise.value = Exercise.DEAD_LIFT
         workoutMemo.value = ""
     }
@@ -194,7 +196,7 @@ class CalViewModel @Inject constructor(
 data class _Sets(
     val repetition: String,
     val weight: String,
-    val unit: Unit = Unit.LBS,
+    val units: Units = Units.LBS,
     val ratio: String,
 ) {
     fun toSets(workoutId: Int?): Sets = Sets(
@@ -202,7 +204,7 @@ data class _Sets(
         workoutId = workoutId,
         repetition = this.repetition.parseNumberString().toInt(),
         weight = this.weight.parseDoubleString().toDouble(),
-        unit = this.unit,
+        units = this.units,
         ratio = this.ratio.parseNumberString().toInt(),
     )
 }

@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.strengthwriter.R
 import com.example.strengthwriter.data.model.Workout
 import com.example.strengthwriter.navigation.Screens
@@ -41,6 +40,7 @@ import com.example.strengthwriter.presentation.components.*
 import com.example.strengthwriter.presentation.viewmodel.DetailViewModel
 import com.example.strengthwriter.ui.theme.*
 import com.example.strengthwriter.utils.RequestState
+import com.example.strengthwriter.utils.Units
 import com.example.strengthwriter.utils.Utils.toFormattedString
 import java.util.*
 
@@ -48,13 +48,14 @@ import java.util.*
 @Composable
 fun DetailScreen(
     screen: Screens,
-    detailViewModel: DetailViewModel = hiltViewModel()
+    detailViewModel: DetailViewModel
 ) {
     val workoutPopup = rememberSaveable { mutableStateOf(false) }
     val loadPopup = rememberSaveable { mutableStateOf(false) }
     val title by detailViewModel.title
     val date by detailViewModel.date
-    val missionId by detailViewModel.missonId
+    val unit by detailViewModel.unit
+    val missionId by detailViewModel.missionId
     val workoutState by detailViewModel.workoutListState
     val workoutList = when(workoutState) {
         is RequestState.Success -> (workoutState as RequestState.Success<List<Workout>>).data
@@ -75,6 +76,8 @@ fun DetailScreen(
     val context: Context = LocalContext.current
 
     val focusManager = LocalFocusManager.current
+
+    val expanded = remember { mutableStateOf(false) }
     Scaffold(
         modifier = Modifier.pointerInput(Unit) {
             detectTapGestures { focusManager.clearFocus() }
@@ -89,20 +92,33 @@ fun DetailScreen(
                 ),
                 isActionButton = true,
                 actionIcon = ActionItem(
-                    icon = Icons.Filled.Check,
-                    onClick = {
-                        if (detailViewModel.validateInputData()) {
-                            if (missionId > 0) {
-                                detailViewModel
+                    icon = Icons.Default.MoreVert,
+                    onClick = { expanded.value = true }
+                ),
+                iconBody = {
+                    DetailMenu(
+                        expanded = expanded.value,
+                        onDismissRequest = { expanded.value = false },
+                        saveAction = {
+                            if (detailViewModel.validateInputData()) {
+                                if (missionId > 0)
+//                                detailViewModel.updateMission()
+                                else
+                                    detailViewModel.addMission()
+                                screen.list()
+                            }  else {
+                                displayToast(context)
                             }
-                            else
-                                detailViewModel.addMission()
+                        },
+                        convertAction = {
+                            detailViewModel.convertUnit()
+                        },
+                        deleteAction = {
+                            detailViewModel.removeDailyMission()
                             screen.list()
-                        }  else {
-                            displayToast(context)
-                        }
-                    }
-                )
+                        },
+                    )
+                }
             )
         }
     ) {
@@ -150,7 +166,8 @@ fun DetailScreen(
         if (workoutPopup.value) {
             WorkoutPopup(
                 navigateTo = { workoutPopup.value = false},
-                popupReturn = { workout -> detailViewModel.addWorkout(workout)}
+                popupReturn = { workout -> detailViewModel.addWorkout(workout)},
+                unit = unit
             )
         }
         if (loadPopup.value) {
@@ -178,6 +195,39 @@ fun DetailScreen(
         detailViewModel.removeWorkout(selectedWorkoutIndex.value)
         selectedWorkoutIndex.value = -1
         openRemoveDialog.value = false
+    }
+}
+
+@Composable
+fun DetailMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    saveAction: () -> Unit,
+    convertAction: () -> Unit,
+    deleteAction: () -> Unit
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { onDismissRequest() }
+    ) {
+        DropdownMenuItem(onClick = {
+            onDismissRequest()
+            saveAction()
+        }) {
+            Text(text = "Save")
+        }
+        DropdownMenuItem(onClick = {
+            onDismissRequest()
+            convertAction()
+        }) {
+            Text(text = "Convert Unit")
+        }
+        DropdownMenuItem(onClick = {
+            onDismissRequest()
+            deleteAction()
+        }) {
+            Text(text = "Delete")
+        }
     }
 }
 
@@ -241,6 +291,7 @@ fun Heading(
                     color = Color.Black
                 )
             }
+
             Row(
                 modifier = Modifier.padding(horizontal = PADDING_MEDIUM),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -286,7 +337,8 @@ fun Heading(
 @Composable
 fun WorkoutPopup(
     navigateTo: () -> Unit,
-    popupReturn: (Workout) -> Unit
+    popupReturn: (Workout) -> Unit,
+    unit: Units
 ) {
     Popup(
         properties = PopupProperties(
@@ -305,7 +357,8 @@ fun WorkoutPopup(
             CalDetail(
                 navigateTo = navigateTo,
                 popupReturn = popupReturn,
-                isPopup = true
+                isPopup = true,
+                unit = unit
             )
         }
     }

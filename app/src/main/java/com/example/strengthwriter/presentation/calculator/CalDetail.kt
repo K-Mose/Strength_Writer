@@ -41,8 +41,8 @@ import com.example.strengthwriter.presentation.viewmodel._Sets
 import com.example.strengthwriter.ui.theme.*
 import com.example.strengthwriter.utils.Exercise
 import com.example.strengthwriter.utils.RequestState
-import com.example.strengthwriter.utils.Unit.LBS
-import com.example.strengthwriter.utils.Utils.parseNumberString
+import com.example.strengthwriter.utils.Units
+import com.example.strengthwriter.utils.Units.LBS
 import kotlinx.coroutines.launch
 
 @Preview
@@ -54,7 +54,7 @@ private fun CalDetailPreview() {
         horizontalAlignment = Alignment.Start,
     ) {
     DetailItem(
-        sets = getEmptySets(),
+        sets = getEmptySets(LBS),
         index = 0,
         updateReps = { _, _ -> },
         updateWeight = { _, _ -> },
@@ -63,7 +63,7 @@ private fun CalDetailPreview() {
         focusList = listOf()
     )
     DetailItem(
-        sets = getEmptySets(),
+        sets = getEmptySets(LBS),
         index = 0,
         updateReps = { _, _ -> },
         updateWeight = { _, _ -> },
@@ -79,6 +79,7 @@ fun CalDetail(
     navigateTo: () -> Unit,
     isPopup: Boolean = false,
     popupReturn: (Workout) -> Unit = {},
+    unit: Units = Units.LBS,
     calViewModel: CalViewModel = hiltViewModel()
 ) {
     val setsState: RequestState<List<_Sets>> by calViewModel.setsState.collectAsState()
@@ -117,7 +118,7 @@ fun CalDetail(
         },
         addItem = {
             calViewModel.addFocusListItem()
-            calViewModel.addSets(getEmptySets())
+            calViewModel.addSets(getEmptySets(unit = unit))
         },
         addExercise = {
             if (!isPopup)
@@ -131,10 +132,31 @@ fun CalDetail(
             calViewModel.removeSets(index)
         },
         focusList = focusList,
-        openDialog = { openDialog.value = true},
-        openDialogValue = openDialog.value,
-        calculateDialog = { oneRm -> calViewModel.calculateSets(oneRm = oneRm)},
-        closeDialog = { openDialog.value = false}
+        openDialog = { openDialog.value = true}
+    )
+    val oneRm = remember { mutableStateOf("")}
+    DisplayAlertDialog(
+        title = "Calculate ${unit.name}",
+        body = {
+            Row {
+                OutlinedTextField(
+                    value = oneRm.value,
+                    onValueChange = { oneRm.value = it},
+                    label = {
+                        Text(text = "1RM")
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number
+                    )
+                )
+            }
+        },
+        openDialog = openDialog.value,
+        closeDialog = { openDialog.value = false },
+        confirmText = "Calc",
+        confirmDialog = {
+            calViewModel.calculateSets(oneRm = oneRm.value.toIntOrNull() ?: 1)
+        }
     )
 }
 
@@ -153,10 +175,7 @@ fun Calculator(
     removeItem: (Int) -> Unit,
     addExercise: () -> Unit,
     focusList: List<FocusRequester>,
-    openDialog: () -> Unit,
-    openDialogValue: Boolean,
-    calculateDialog: (Int) -> Unit,
-    closeDialog: () -> Unit
+    openDialog: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -250,7 +269,9 @@ fun Calculator(
             }
         }
         Surface(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 1.dp)
         ) {
             DetailList(
                 setsList = setsList,
@@ -262,30 +283,6 @@ fun Calculator(
                 focusList = focusList
             )
         }
-        val oneRm = remember { mutableStateOf("")}
-        DisplayAlertDialog(
-            title = "Calculate LBS",
-            body = {
-                   Row {
-                       OutlinedTextField(
-                           value = oneRm.value,
-                           onValueChange = { oneRm.value = it},
-                           label = {
-                               Text(text = "1RM")
-                           },
-                           keyboardOptions = KeyboardOptions.Default.copy(
-                               keyboardType = KeyboardType.Number
-                           )
-                       )
-                   }
-            },
-            openDialog = openDialogValue,
-            closeDialog = { closeDialog()},
-            confirmText = "Calc",
-            confirmDialog = {
-                calculateDialog(oneRm.value.toIntOrNull() ?: 1)
-            }
-        )
     }
 }
 
@@ -472,9 +469,9 @@ private fun DetailItem(
 
 }
 
-fun getEmptySets(): _Sets = _Sets(
+fun getEmptySets(unit: Units): _Sets = _Sets(
     weight = "",
     ratio = "",
-    unit = LBS,
+    units = unit,
     repetition = ""
 )

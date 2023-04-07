@@ -5,11 +5,18 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.regex.Pattern
+import kotlin.math.round
 
 object Utils {
     fun Double.removeDecimal(): String {
         return this.toString().replace(".0", "")
     }
+
+    fun Double.convertKg(): Double =
+        round(this * 0.454)
+
+    fun Double.convertLbs(): Double =
+        round(this * 100 / 45.4)
 
     fun String.parseNumberString(): String =
         if (this.isNotEmpty())
