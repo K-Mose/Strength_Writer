@@ -295,7 +295,10 @@ private fun DetailList(
 ) {
     Log.d("CALCULATOR::DetailList", "$setsList")
     // LazyColumn으로 하면 보이지 않는 리스트는 생성되지 않아서 포커싱 할 수 없음
-    Column {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier.verticalScroll(scrollState)
+    ) {
         repeat(setsList.size) {index ->
             val sets = setsList[index]
             DetailItem(
