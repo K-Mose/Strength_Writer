@@ -5,6 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import com.example.strengthwriter.data.DailyMissionDao
 import com.example.strengthwriter.data.SetsDao
 import com.example.strengthwriter.data.WorkoutDao
@@ -21,6 +22,7 @@ import javax.inject.Inject
 import com.example.strengthwriter.utils.Units
 import com.example.strengthwriter.utils.Utils.convertKg
 import com.example.strengthwriter.utils.Utils.convertLbs
+import kotlinx.coroutines.CoroutineExceptionHandler
 
 @HiltViewModel // @Inject annotation이 필요함
 class DetailViewModel @Inject constructor(
@@ -86,7 +88,6 @@ class DetailViewModel @Inject constructor(
         _workoutListState.value = RequestState.Loading(_workoutList)
         _workoutList.add(workout)
         viewModelScope.launch(Dispatchers.IO) {
-            Thread.sleep(50)
             _workoutListState.value = RequestState.Success(_workoutList)
         }
     }
@@ -96,7 +97,6 @@ class DetailViewModel @Inject constructor(
             _workoutListState.value = RequestState.Loading(_workoutList)
             _workoutList.removeAt(index)
             viewModelScope.launch(Dispatchers.IO) {
-                Thread.sleep(50)
                 _workoutListState.value = RequestState.Success(_workoutList)
             }
         }
@@ -124,9 +124,7 @@ class DetailViewModel @Inject constructor(
                     .map {
                         it.copy(id = 0)
                     }
-                Log.d("DetailViewModel::loadedWorkoutList", "list : $loadedWorkoutList")
                 _loadedWorkoutState.value = RequestState.Success(loadedWorkoutList)
-                Log.d("DetailViewModel::loadedWorkoutList", "list : $loadedWorkoutState")
             }
         }
         Log.d("DetailViewModel::loadedWorkoutList", "end")
@@ -134,26 +132,31 @@ class DetailViewModel @Inject constructor(
 
     fun loadMission(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            dailyMissionDao.getMission(id = id).collect {  mw ->
-                mw.mission.also { mission ->
-                    title.value = mission.title
-                    date.value = mission.date
-                    missionId.value = mission.id
+            dailyMissionDao.getMission(id = id)?.collect {  mw ->
+                if (mw != null) {
+                    Log.d("DetailViewModel::loadMission", "mv : $mw")
+                    mw.mission.also { mission ->
+                        title.value = mission.title
+                        date.value = mission.date
+                        missionId.value = mission.id
+                    }
+                    // ViewModel 공유하므로 초기화 시켜줌
+                    _workoutList.clear()
+                    mw.workouts.onEach { ws ->
+                        if (!ws.sets.isNullOrEmpty())
+                            unit.value = ws.sets[0].units
+                        ws.workout.sets.addAll(ws.sets)
+                        _workoutList.add(ws.workout)
+                    }
+                    _mission.value = mw.mission.copy(
+                        id = missionId.value,
+                        title = title.value,
+                        date = date.value,
+                        workout = _workoutList
+                    )
                 }
-                // ViewModel 공유하므로 초기화 시켜줌
-                _workoutList.clear()
-                mw.workouts.onEach { ws ->
-                    unit.value = ws.sets[0].units ?: Units.LBS
-                    ws.workout.sets.addAll(ws.sets)
-                    _workoutList.add(ws.workout)
-                }
-                _mission.value = mw.mission.copy(
-                    id = missionId.value,
-                    title = title.value,
-                    date = date.value,
-                    workout = _workoutList
-                )
-
+                else
+                    _workoutList.clear()
                 _workoutListState.value = RequestState.Success(_workoutList)
             }
         }
@@ -162,7 +165,7 @@ class DetailViewModel @Inject constructor(
     fun addMission() {
         Log.d("DetailViewModel::loadedWorkoutList", "save")
         database.runInTransaction {
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
                 val missionId: Int = dailyMissionDao.insertNewDailyMission(
                     DailyMission(
                         id = 0,
@@ -209,9 +212,10 @@ class DetailViewModel @Inject constructor(
     }
 
     fun removeDailyMission() {
-        _mission.value?.let { mission ->
-            database.runInTransaction {
-                viewModelScope.launch(Dispatchers.Main) {
+        val mission = _mission.value
+        if (mission != null)
+            viewModelScope.launch(Dispatchers.Main) {
+                database.withTransaction {
                     mission.workout.forEach { workout ->
                         workout.sets.forEach { sets ->
                             setsDao.deleteSets(sets = sets)
@@ -221,14 +225,19 @@ class DetailViewModel @Inject constructor(
                     dailyMissionDao.deleteDailyMission(mission = mission)
                 }
             }
-        }
     }
 
     fun validateInputData(): Boolean {
+        Log.d("Validation::", title.value)
+        Log.d("Validation::", "$_workoutList")
         if (title.value.isEmpty())
             return false
         if (_workoutList.isEmpty())
             return false
         return true
+    }
+
+    val coroutineExceptionHandler = CoroutineExceptionHandler{ _, throwable ->
+        throwable.printStackTrace()
     }
 }

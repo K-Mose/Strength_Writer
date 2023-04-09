@@ -92,7 +92,6 @@ class CalViewModel @Inject constructor(
         _setsState.value = RequestState.Loading(_setsList)
         _setsList[index] = _setsList[index].copy(repetition = reps.parseNumberString())
         viewModelScope.launch(Dispatchers.IO) {
-            Thread.sleep(50)
             _setsState.value = RequestState.Success(_setsList)
         }
     }
@@ -101,7 +100,6 @@ class CalViewModel @Inject constructor(
         _setsState.value = RequestState.Loading(_setsList)
         _setsList[index] = _setsList[index].copy(weight = weight.parseDoubleString())
         viewModelScope.launch(Dispatchers.IO) {
-            Thread.sleep(50)
             _setsState.value = RequestState.Success(_setsList)
         }
     }
@@ -110,7 +108,6 @@ class CalViewModel @Inject constructor(
         _setsState.value = RequestState.Loading(_setsList)
         _setsList[index] = _setsList[index].copy(ratio = ratio.parseNumberString())
         viewModelScope.launch(Dispatchers.IO) {
-            Thread.sleep(50)
             _setsState.value = RequestState.Success(_setsList)
         }
     }
@@ -119,7 +116,6 @@ class CalViewModel @Inject constructor(
         _setsState.value = RequestState.Loading(_setsList)
         _setsList.add(sets)
         viewModelScope.launch(Dispatchers.IO) {
-            Thread.sleep(50)
             _setsState.value = RequestState.Success(_setsList)
         }
     }
@@ -128,7 +124,6 @@ class CalViewModel @Inject constructor(
         _setsState.value = RequestState.Loading(_setsList)
         _setsList.removeAt(index)
         viewModelScope.launch(Dispatchers.IO) {
-            Thread.sleep(50)
             _setsState.value = RequestState.Success(_setsList)
         }
     }

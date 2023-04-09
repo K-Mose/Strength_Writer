@@ -114,8 +114,8 @@ fun DetailScreen(
                             detailViewModel.convertUnit()
                         },
                         deleteAction = {
-                            detailViewModel.removeDailyMission()
                             screen.list()
+                            detailViewModel.removeDailyMission()
                         },
                     )
                 }

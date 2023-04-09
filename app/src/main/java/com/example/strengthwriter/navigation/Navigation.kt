@@ -1,5 +1,6 @@
 package com.example.strengthwriter.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -48,8 +49,9 @@ fun Navigation(
                 type = NavType.IntType
             })
         ) { backstackEntry ->
-            val id = backstackEntry.arguments!!.getInt("id")
-            LaunchedEffect(key1 = id) {
+            // how to prevent call navigation multiple times
+            val id = backstackEntry.arguments?.getInt("id") ?: -1
+            LaunchedEffect(id) {
                 detailViewModel.initAll()
                 if (id > 0)
                     detailViewModel.loadMission(id)
