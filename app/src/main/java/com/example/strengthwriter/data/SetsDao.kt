@@ -13,11 +13,11 @@ interface SetsDao {
     @Query("SELECT * FROM $SETS_TABLE WHERE id = :id")
     fun getSets(id: Int): Flow<Sets>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertNewSets(sets: Sets)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addNewSets(sets: Sets)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertNewSetsList(setsList: List<Sets>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addNewSetsList(setsList: List<Sets>)
 
     @Update
     suspend fun updateSets(sets: Sets)

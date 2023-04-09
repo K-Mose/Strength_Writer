@@ -2,8 +2,6 @@ package com.example.strengthwriter.data
 
 import androidx.room.*
 import com.example.strengthwriter.data.model.*
-import com.example.strengthwriter.utils.Constants.WORKOUT_TABLE
-import com.example.strengthwriter.utils.Constants.SETS_TABLE
 import com.example.strengthwriter.utils.Constants.MISSION_TABLE
 import kotlinx.coroutines.flow.Flow
 
@@ -22,8 +20,8 @@ interface DailyMissionDao {
     @Query("SELECT * FROM $MISSION_TABLE WHERE id = :id")
     fun getMission(id: Int): Flow<MissionAndWorkout>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertNewDailyMission(mission: DailyMission): Long
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addNewDailyMission(mission: DailyMission): Long
 
     @Update
     suspend fun updateDailyMission(mission: DailyMission)

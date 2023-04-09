@@ -91,33 +91,46 @@ fun DetailScreen(
                     onClick = screen.list
                 ),
                 isActionButton = true,
-                actionIcon = ActionItem(
-                    icon = Icons.Default.MoreVert,
-                    onClick = { expanded.value = true }
-                ),
-                iconBody = {
-                    DetailMenu(
-                        expanded = expanded.value,
-                        onDismissRequest = { expanded.value = false },
-                        saveAction = {
-                            if (detailViewModel.validateInputData()) {
-                                if (missionId > 0)
-//                                detailViewModel.updateMission()
-                                else
-                                    detailViewModel.addMission()
-                                screen.list()
-                            }  else {
-                                displayToast(context)
-                            }
-                        },
-                        convertAction = {
-                            detailViewModel.convertUnit()
-                        },
-                        deleteAction = {
-                            screen.list()
-                            detailViewModel.removeDailyMission()
-                        },
+                actionIcon = if (missionId > 0) {
+                    ActionItem(
+                        icon = Icons.Default.MoreVert,
+                        onClick = { expanded.value = true }
                     )
+                } else {
+                       ActionItem(
+                           icon = Icons.Default.Check,
+                           onClick = {
+                               if (detailViewModel.validateInputData()) {
+                                   detailViewModel.addMission()
+                                   screen.list
+                               } else {
+                                   displayToast(context)
+                               }
+                           }
+                       )
+               },
+                iconBody = {
+                    if (missionId > 0) {
+                        DetailMenu(
+                            expanded = expanded.value,
+                            onDismissRequest = { expanded.value = false },
+                            updateAction = {
+                                if (detailViewModel.validateInputData()) {
+                                    detailViewModel.updateMission()
+                                    screen.list()
+                                }  else {
+                                    displayToast(context)
+                                }
+                            },
+                            convertAction = {
+                                detailViewModel.convertUnit()
+                            },
+                            deleteAction = {
+                                screen.list()
+                                detailViewModel.removeDailyMission()
+                            },
+                        )
+                    }
                 }
             )
         }
@@ -202,7 +215,7 @@ fun DetailScreen(
 fun DetailMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    saveAction: () -> Unit,
+    updateAction: () -> Unit,
     convertAction: () -> Unit,
     deleteAction: () -> Unit
 ) {
@@ -212,7 +225,7 @@ fun DetailMenu(
     ) {
         DropdownMenuItem(onClick = {
             onDismissRequest()
-            saveAction()
+            updateAction()
         }) {
             Text(text = "Save")
         }

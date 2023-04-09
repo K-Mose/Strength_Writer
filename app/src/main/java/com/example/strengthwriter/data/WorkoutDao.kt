@@ -19,7 +19,7 @@ interface WorkoutDao {
     @Query("SELECT * FROM $WORKOUT_TABLE WHERE id = :id")
     fun getWorkout(id: Int): Flow<Workout>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addNewWorkout(workout: Workout): Long // id retun type은 long
 
     @Update

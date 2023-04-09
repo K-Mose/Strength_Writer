@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.focus.FocusRequester
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import com.example.strengthwriter.data.SetsDao
 import com.example.strengthwriter.data.WorkoutDao
 import com.example.strengthwriter.data.WriterDatabase
@@ -163,7 +164,7 @@ class CalViewModel @Inject constructor(
                 )
             )
             Log.d("${this::class.simpleName}::", "workoutId :: $workoutId")
-            setsDao.insertNewSetsList(
+            setsDao.addNewSetsList(
                 _setsList.map {
                     it.toSets(workoutId.toInt())
                 }
@@ -182,8 +183,8 @@ class CalViewModel @Inject constructor(
 
     fun removeWorkout(workout: Workout) {
         // remove sets, remove workout
-        database.runInTransaction {
-            viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
+            database.withTransaction {
                 workout.sets.forEach { sets ->
                     setsDao.deleteSets(sets = sets)
                 }

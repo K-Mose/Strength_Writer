@@ -1,9 +1,8 @@
 package com.example.strengthwriter.presentation.viewmodel
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import com.example.strengthwriter.data.DailyMissionDao
 import com.example.strengthwriter.data.SetsDao
 import com.example.strengthwriter.data.WorkoutDao
@@ -36,7 +35,6 @@ class ListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             dailyMissionDao.getAllMissions().collect { missions ->
                 val list = mutableListOf<DailyMission>()
-                Log.d("${this::class.simpleName}::", "missions :: $missions")
                 missions.forEach { mW ->
                     mW.workouts.forEach { wS ->
                         wS.workout.sets.addAll(wS.sets)
@@ -51,8 +49,8 @@ class ListViewModel @Inject constructor(
     }
 
     fun removeDailyMission(mission: DailyMission) {
-        database.runInTransaction {
-            viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.Main) {
+            database.withTransaction {
                 mission.workout.forEach { workout ->
                     workout.sets.forEach { sets ->
                         setsDao.deleteSets(sets = sets)

@@ -164,9 +164,9 @@ class DetailViewModel @Inject constructor(
 
     fun addMission() {
         Log.d("DetailViewModel::loadedWorkoutList", "save")
-        database.runInTransaction {
-            viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
-                val missionId: Int = dailyMissionDao.insertNewDailyMission(
+        viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
+            database.withTransaction {
+                val missionId: Int = dailyMissionDao.addNewDailyMission(
                     DailyMission(
                         id = 0,
                         date = date.value,
@@ -180,7 +180,7 @@ class DetailViewModel @Inject constructor(
                     val _setsList = workout.sets.map { sets ->
                         sets.copy(id = 0, workoutId = workoutId)
                     }
-                    setsDao.insertNewSetsList(_setsList)
+                    setsDao.addNewSetsList(_setsList)
                 }
             }
         }
@@ -190,10 +190,11 @@ class DetailViewModel @Inject constructor(
         /*
         새로운 데이터는 추가하고
         지울 데이터는 지움
+        -> OnConflictStrategy.REPLACE, update 사용하지 않고 데이터 replace
          */
-        database.runInTransaction {
-            viewModelScope.launch(Dispatchers.IO) {
-                dailyMissionDao.updateDailyMission(
+        viewModelScope.launch(Dispatchers.IO) {
+            database.withTransaction {
+                dailyMissionDao.addNewDailyMission(
                     mission = DailyMission(
                         id = missionId.value,
                         title = title.value,
@@ -201,10 +202,10 @@ class DetailViewModel @Inject constructor(
                     )
                 )
                 _workoutList.forEach { workout ->
-                    workoutDao.updateWorkout(workout = workout)
-                    workout.sets.forEach { sets ->
-                        setsDao.updateSets(sets = sets)
-                    }
+                    val workoutId = workoutDao.addNewWorkout(workout = workout.copy(missionId = missionId.value)).toInt()
+                    setsDao.addNewSetsList(workout.sets.map { sets ->
+                        sets.copy(workoutId = workoutId)
+                    }.toMutableList())
                 }
 
             }
@@ -237,7 +238,7 @@ class DetailViewModel @Inject constructor(
         return true
     }
 
-    val coroutineExceptionHandler = CoroutineExceptionHandler{ _, throwable ->
+    private val coroutineExceptionHandler = CoroutineExceptionHandler{ _, throwable ->
         throwable.printStackTrace()
     }
 }
